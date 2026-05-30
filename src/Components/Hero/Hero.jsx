@@ -3,6 +3,8 @@ import { Autoplay, Pagination, EffectFade } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/effect-fade";
+import PrimaryButton from "../UI/Button/Button";
+import ButtonLink from "../UI/Link";
 
 export default function Hero() {
   const images = [
@@ -26,9 +28,7 @@ export default function Hero() {
             the modern individual. Timeless pieces, modern silhouettes.
           </p>
           <div className="flex flex-wrap gap-5">
-            <button className="px-10 py-4 bg-[#4f378a] text-white text-sm font-bold rounded-xl cursor-pointer border-none hover:bg-[#5f479a] transition-all hover:scale-105 duration-300 shadow-[0_10px_30px_rgba(79,55,138,0.3)]">
-              Shop Now
-            </button>
+            <ButtonLink to="/shop-all" text="Show now"></ButtonLink>
             <button className="px-10 py-4 bg-white/5 text-white text-sm font-bold rounded-xl cursor-pointer border border-white/10 hover:bg-white/10 transition-all hover:scale-105 duration-300 backdrop-blur-sm">
               Explore Collection
             </button>

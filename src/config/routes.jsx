@@ -18,8 +18,11 @@ import Register from "../pages/auth/Register.jsx";
 // ── Other pages ─────────────────────────────────────────────────────────────
 import NewArrivalsPage from "../pages/NewArrivalsPage.jsx";
 import ShopAllPage from "../pages/ShopAllPage.jsx";
+import ProductDetailPage from "../pages/ProductDetailPage.jsx";
 import StoryPage from "../pages/StoryPage.jsx";
 import ContactUsPage from "../pages/ContactUsPage.jsx";
+import { Component } from "react";
+import NotFound from "../pages/NotFound.jsx";
 
 const routes = [
   {
@@ -44,12 +47,12 @@ const routes = [
 
       // ── Shop routes ────────────────────────────────────────────────────
       {
-        path: "new-arrivals",
-        Component: NewArrivalsPage,
-      },
-      {
         path: "shop-all",
         Component: ShopAllPage,
+      },
+      {
+        path: "product/:id",
+        Component: ProductDetailPage,
       },
 
       // ── Content routes ─────────────────────────────────────────────────
@@ -63,6 +66,7 @@ const routes = [
       },
     ],
   },
+  {path: "*", Component: NotFound}
 ];
 
 export default routes;

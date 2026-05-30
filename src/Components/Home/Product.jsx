@@ -1,3 +1,8 @@
+import { toast } from "sonner";
+import { Link, useNavigate } from "react-router-dom";
+import SingleProductItem from "../Product/SingleProductGridItem";
+import { MOCK_PRODUCTS } from "../../data/products";
+
 const collections = [
   {
     label: "Women",
@@ -13,34 +18,16 @@ const collections = [
   },
 ];
 
-const products = [
-  {
-    name: "The Signature Tee",
-    price: "$120.00",
-    img: "https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?q=80&w=600&auto=format&fit=crop",
-  },
-  {
-    name: "Modern Tailored Trouser",
-    price: "$240.00",
-    img: "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?q=80&w=600&auto=format&fit=crop",
-  },
-  {
-    name: "Structured Leather Mini",
-    price: "$350.00",
-    img: "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?q=80&w=600&auto=format&fit=crop",
-  },
-  {
-    name: "Cashmere Blend Knit",
-    price: "$195.00",
-    img: "https://images.unsplash.com/photo-1576566588028-4147f3842f27?q=80&w=600&auto=format&fit=crop",
-  },
-];
-
 export default function ProductSection() {
+  const navigate = useNavigate();
+
+  // Use the first 4 products from the centralized database as Featured Essentials
+  const featuredProducts = MOCK_PRODUCTS.slice(0, 4);
+
   return (
     <>
       {/* COLLECTIONS */}
-      <section className="max-w-1440px mx-auto px-16 py-20">
+      <section className="max-w-[1440px] mx-auto px-16 py-20">
         <div className="grid grid-cols-3 gap-6">
           {collections.map(({ label, img }) => (
             <div
@@ -83,39 +70,28 @@ export default function ProductSection() {
               Featured Essentials
             </h2>
 
-            <a
-              href="#"
+            <Link
+              to="shop-all"
               className="text-xs font-bold tracking-[0.1em] uppercase text-[#4f378a] no-underline hover:opacity-70 transition-opacity"
             >
               View All
-            </a>
+            </Link>
           </div>
 
+          {/* Reusable product cards */}
           <div className="grid grid-cols-4 gap-6">
-            {products.map(({ name, price, img }) => (
-              <div
-                key={name}
-                className="group bg-white rounded-xl overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.06)] cursor-pointer"
-              >
-                <div className="relative aspect-square overflow-hidden">
-                  <img
-                    src={img}
-                    alt={name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-
-                  <div className="absolute inset-0 flex items-center justify-center bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <button className="flex items-center gap-2 px-6 py-3 bg-[#4f378a] text-white text-sm font-semibold rounded-full border-none">
-                      Add to Cart
-                    </button>
-                  </div>
-                </div>
-
-                <div className="p-4">
-                  <p className="text-sm font-semibold mb-1">{name}</p>
-                  <p className="text-sm text-[#49454f]">{price}</p>
-                </div>
-              </div>
+            {featuredProducts.map((product) => (
+              <SingleProductItem
+                key={product.id}
+                name={product.name}
+                price={product.price}
+                img={product.img}
+                onClick={() => navigate(`/product/${product.id}`)}
+                onAddToCart={() => {
+                  console.log("Added to cart", product.name);
+                  toast.success(product.name + " added to cart");
+                }}
+              />
             ))}
           </div>
         </div>

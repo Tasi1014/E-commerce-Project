@@ -1,14 +1,16 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { FiSearch } from "react-icons/fi";
+import { FiSearch, FiHeart } from "react-icons/fi";
 import { BsCart3 } from "react-icons/bs";
+import ButtonLink from "../UI/Link";
+import { useWishlist } from "../../context/WishlistContext";
 
 export default function HomeHeader() {
   const [showSearch, setShowSearch] = useState(false);
+  const { wishlist, setIsOpen } = useWishlist();
 
   const navLinks = [
     { label: "Collections", path: "/" },
-    { label: "New Arrivals", path: "/new-arrivals" },
     { label: "Shop All", path: "/shop-all" },
     { label: "Our Story", path: "/story" },
     { label: "Contact Us", path: "/contact-us" },
@@ -57,6 +59,20 @@ export default function HomeHeader() {
             <FiSearch size={20} color="#1d1b20" />
           </button>
 
+          {/* Wishlist Button with Badge */}
+          <button
+            onClick={() => setIsOpen(true)}
+            className="p-2 hover:scale-110 transition-all duration-300 bg-transparent border-none cursor-pointer relative"
+            aria-label="Open Wishlist"
+          >
+            <FiHeart size={20} color="#1d1b20" />
+            {wishlist.length > 0 && (
+              <span className="absolute top-1 right-1 w-4.5 h-4.5 bg-[#4f378a] text-white text-[9px] font-bold rounded-full flex items-center justify-center border border-white">
+                {wishlist.length}
+              </span>
+            )}
+          </button>
+
           {/* Cart */}
           <button className="p-2 hover:scale-110 transition-all duration-300 bg-transparent border-none cursor-pointer">
             <BsCart3 size={20} color="#1d1b20" />
@@ -72,7 +88,7 @@ export default function HomeHeader() {
 
           {/* SEARCH INPUT (animated) */}
           <div
-            className={`absolute right-45 top-1/2 -translate-y-1/2 transition-all duration-300 origin-right ${
+            className={`absolute right-55 top-1/2 -translate-y-1/2 transition-all duration-300 origin-right ${
               showSearch
                 ? "opacity-100 scale-100 pointer-events-auto"
                 : "opacity-0 scale-95 pointer-events-none"
