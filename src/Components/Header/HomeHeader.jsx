@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { FiSearch } from "react-icons/fi";
 import { BsCart3 } from "react-icons/bs";
 
@@ -7,11 +7,11 @@ export default function HomeHeader() {
   const [showSearch, setShowSearch] = useState(false);
 
   const navLinks = [
-    "Collections",
-    "New Arrivals",
-    "Shop All",
-    "Journal",
-    "Sustainability",
+    { label: "Collections", path: "/" },
+    { label: "New Arrivals", path: "/new-arrivals" },
+    { label: "Shop All", path: "/shop-all" },
+    { label: "Our Story", path: "/story" },
+    { label: "Contact Us", path: "/contact-us" },
   ];
 
   return (
@@ -28,18 +28,21 @@ export default function HomeHeader() {
 
         {/* Center Nav */}
         <div className="flex-1 flex justify-center gap-8">
-          {navLinks.map((label, i) => (
-            <a
-              key={label}
-              href="#"
-              className={`text-xs font-semibold tracking-[0.1em] uppercase hover:scale-110 transition-all duration-300 pb-0.5 ${
-                i === 0
-                  ? "text-[#4f378a] border-b-2 border-[#4f378a]"
-                  : "text-[#49454f] hover:text-[#4f378a]"
-              }`}
+          {navLinks.map((link) => (
+            <NavLink
+              to={link.path}
+              key={link.label}
+              end={link.path === "/"}
+              className={({ isActive }) =>
+                `text-xs font-semibold tracking-[0.1em] uppercase hover:scale-110 transition-all duration-300 pb-0.5 ${
+                  isActive
+                    ? "text-[#4f378a] border-b-2 border-[#4f378a]"
+                    : "text-[#49454f] hover:text-[#4f378a]"
+                }`
+              }
             >
-              {label}
-            </a>
+              {link.label}
+            </NavLink>
           ))}
         </div>
 
