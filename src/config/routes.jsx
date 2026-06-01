@@ -23,6 +23,11 @@ import StoryPage from "../pages/StoryPage.jsx";
 import ContactUsPage from "../pages/ContactUsPage.jsx";
 import { Component } from "react";
 import NotFound from "../pages/NotFound.jsx";
+import AdminDashboard from "../pages/admin/AdminDashboard.jsx";
+import AdminLayout from "../layouts/AdminLayout.jsx";
+import AdminProducts from "../pages/admin/AdminProducts.jsx";
+import AdminOrders from "../pages/admin/AdminOrders.jsx";
+import AdminCustomers from "../pages/admin/AdminCustomers.jsx";
 
 const routes = [
   {
@@ -66,7 +71,36 @@ const routes = [
       },
     ],
   },
-  {path: "*", Component: NotFound}
+  {path: "*", Component: NotFound},
+  {
+    path: "/admin",
+    Component: AdminLayout,
+    children: [
+      // Home
+      {
+        path: "dashboard",
+        Component: AdminDashboard,
+      },
+
+      // ── Auth routes ────────────────────────────────────────────────────
+      {
+        path: "products",
+        Component: AdminProducts,
+      },
+      {
+        path: "orders",
+        Component: AdminOrders,
+      },
+
+      // ── Shop routes ────────────────────────────────────────────────────
+      {
+        path: "customers",
+        Component: AdminCustomers,
+      },
+      
+    ],
+  },
+
 ];
 
 export default routes;

@@ -29,17 +29,19 @@ import FormContainer from "../../components/form/FormContainer";
 import FormInput from "../../components/form/FormInput";
 import FormButton from "../../components/form/FormButton";
 
+// API function (axios)
+import { registerUser } from "../../api/authApi";
+import { useAuth } from "../../context/AuthContext";
+
 export default function Register() {
   const navigate = useNavigate();
 
-  // ─── React Hook Form setup ───────────────────────────────────────────────
-  // Same pattern as Login — just a different schema and more fields.
   const {
     control,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm({
-    resolver: zodResolver(registerSchema), // Zod validates before onSubmit is called
+    resolver: zodResolver(registerSchema),
     defaultValues: {
       firstName: "",
       email: "",
@@ -47,59 +49,43 @@ export default function Register() {
       confirmPassword: "",
     },
   });
+  const { login } = useAuth();
 
-  // ─── Submit handler ──────────────────────────────────────────────────────
-  // Only runs if Zod validation passes (including the .refine() password match check).
   const onSubmit = async (data) => {
     try {
-      console.log("Register payload →", data);
+      // Map frontend fields to backend expectations
+      const payload = {
+        name: data.firstName,    // backend expects 'name'
+        email: data.email,
+        password: data.password,
+      };
 
-      // ════════════════════════════════════════════════════
-      // TODO: Replace mock below with your real API call
-      //
-      // const response = await fetch("/api/auth/register", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({
-      //     firstName: data.firstName,
-      //     email: data.email,
-      //     password: data.password,
-      //   }),
-      // });
-      //
-      // const result = await response.json();
-      //
-      // if (!response.ok) {
-      //   throw new Error(result.message || "Registration failed");
-      // }
-      //
-      // localStorage.setItem("token", result.token);
-      // ════════════════════════════════════════════════════
+      const response = await registerUser(payload);
 
-      // Mock 1.5s API delay
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+      // Extract token and user from response
+      const { token, user } = response.data;
 
-      // ✅ Success toast — then redirect to login
-      toast.success("Account created! Welcome to PEAK.");
-      navigate("/login");
+      // Auto-login globally
+      login(user, token);
+
+      // Registration successful
+      toast.success(response.data.message || "Account created! Welcome to PEAK.");
+      
+      // Redirect to home page
+      navigate("/");
     } catch (err) {
-      // ❌ Server error toast (email already exists, network issues, etc.)
-      toast.error(err.message || "Something went wrong. Please try again.");
+      // Handle server errors (e.g., email already exists)
+      const errorMsg = err.response?.data?.message || "Something went wrong. Please try again.";
+      toast.error(errorMsg);
     }
   };
-
-  // ─────────────────────────────────────────────────────────────────────────
 
   return (
     <FormContainer
       title="Join PEAK"
       subtitle="Create an account to start your curated journey."
     >
-
-      {/* ── Form ── */}
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-5">
-
-        {/* First name field */}
         <FormInput
           name="firstName"
           control={control}
@@ -109,7 +95,6 @@ export default function Register() {
           errors={errors}
         />
 
-        {/* Email field */}
         <FormInput
           name="email"
           control={control}
@@ -119,7 +104,6 @@ export default function Register() {
           errors={errors}
         />
 
-        {/* Password field */}
         <FormInput
           name="password"
           control={control}
@@ -129,8 +113,6 @@ export default function Register() {
           errors={errors}
         />
 
-        {/* Confirm password field */}
-        {/* The "Passwords do not match" error comes from Zod .refine() in registerSchema.js */}
         <FormInput
           name="confirmPassword"
           control={control}
@@ -140,7 +122,6 @@ export default function Register() {
           errors={errors}
         />
 
-        {/* Submit button — isSubmitting from RHF drives the loading state */}
         <div className="pt-2">
           <FormButton
             text="Create Account"
@@ -150,7 +131,6 @@ export default function Register() {
         </div>
       </form>
 
-      {/* ── Footer: link to Login ── */}
       <p className="text-center text-sm text-[#49454f] mt-8 mb-0">
         Already have an account?{" "}
         <Link

@@ -3,8 +3,9 @@
  * ─────────────────────────────────────────────
  * Login page for PEAK with Customer / Admin toggle.
  *
- * - Customer mode: normal login (API call mock)
- * - Admin mode: hardcoded credentials, "Forgot password?" hidden
+ * - Customer mode: real backend login (/api/auth/login)
+ * - Admin mode: real backend admin login (/api/auth/admin-login)
+ * - "Forgot password?" only shown for customers
  */
 
 import { useState } from "react";
@@ -21,15 +22,14 @@ import FormContainer from "../../components/form/FormContainer";
 import FormInput from "../../components/form/FormInput";
 import FormButton from "../../components/form/FormButton";
 
-// Hardcoded admin credentials
-const ADMIN_CREDENTIALS = {
-  email: "admin@peak.com",
-  password: "admin123",
-};
+// API functions (axios)
+import { loginUser, adminLogin } from "../../api/authApi";
+import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
   const navigate = useNavigate();
   const [role, setRole] = useState("customer"); // "customer" or "admin"
+  const { login } = useAuth();
 
   const {
     control,
@@ -46,30 +46,28 @@ export default function Login() {
 
   const onSubmit = async (data) => {
     try {
-      if (role === "admin") {
-        // ─── Admin login (hardcoded) ──────────────────────────
-        if (
-          data.email === ADMIN_CREDENTIALS.email &&
-          data.password === ADMIN_CREDENTIALS.password
-        ) {
-          toast.success("Admin login successful!");
-          // TODO: store admin token/session if needed
-          navigate("/admin/dashboard"); // Redirect to admin panel
-        } else {
-          throw new Error("Invalid admin credentials");
-        }
+      // Choose which API endpoint to call
+      const apiCall = role === "admin" ? adminLogin : loginUser;
+      const response = await apiCall(data);
+
+      // Extract token and user from response
+      const { token, user } = response.data;
+
+      // Store authentication data globally
+      login(user, token);
+
+      toast.success(response.data.message || "Login successful");
+
+      // Redirect based on role
+      if (user.role === "admin") {
+        navigate("/admin/dashboard");
       } else {
-        // ─── Customer login (API mock – replace with real call) ──
-        console.log("Customer login payload →", data);
-
-        // Simulate API call
-        await new Promise((resolve) => setTimeout(resolve, 1500));
-
-        toast.success("Welcome back! You're now signed in.");
         navigate("/");
       }
     } catch (err) {
-      toast.error(err.message || "Invalid email or password. Please try again.");
+      // Handle errors from the backend
+      const errorMsg = err.response?.data?.message || "Invalid email or password. Please try again.";
+      toast.error(errorMsg);
     }
   };
 
@@ -88,7 +86,6 @@ export default function Login() {
           : "Sign in to your PEAK account"
       }
     >
-
       {/* ── Form ── */}
       <form onSubmit={handleSubmit(onSubmit)} noValidate className="space-y-6">
         {/* Email field */}
@@ -148,6 +145,7 @@ export default function Login() {
           </Link>
         </p>
       )}
+
       {/* ── Toggle Button ── */}
       <div className="flex justify-center mt-6">
         <button
@@ -170,6 +168,5 @@ export default function Login() {
         </span>
       </div>
     </FormContainer>
-    
   );
 }

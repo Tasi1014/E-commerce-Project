@@ -2,6 +2,7 @@ import { toast } from "sonner";
 import { Link, useNavigate } from "react-router-dom";
 import SingleProductItem from "../Product/SingleProductGridItem";
 import { MOCK_PRODUCTS } from "../../data/products";
+import { useCart } from "../../context/CartContext";
 
 const collections = [
   {
@@ -20,6 +21,7 @@ const collections = [
 
 export default function ProductSection() {
   const navigate = useNavigate();
+  const { addToCart } = useCart();
 
   // Use the first 4 products from the centralized database as Featured Essentials
   const featuredProducts = MOCK_PRODUCTS.slice(0, 4);
@@ -88,8 +90,7 @@ export default function ProductSection() {
                 img={product.img}
                 onClick={() => navigate(`/product/${product.id}`)}
                 onAddToCart={() => {
-                  console.log("Added to cart", product.name);
-                  toast.success(product.name + " added to cart");
+                  addToCart(product, product.colors?.[0] || null, product.sizes?.[0] || "", 1);
                 }}
               />
             ))}

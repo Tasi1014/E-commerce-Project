@@ -1,31 +1,30 @@
-import { useState, useMemo, useEffect, useRef } from "react";
-import { useNavigate } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
-import { FiChevronLeft, FiChevronRight, FiChevronDown } from "react-icons/fi";
+import { FiChevronLeft, FiChevronRight, FiChevronDown, FiX } from "react-icons/fi";
 import SingleProductItem from "../Components/Product/SingleProductGridItem";
-import { MOCK_PRODUCTS } from "../data/products";
+import { fetchProducts, searchProducts } from "../api/productApi";
+import { useCart } from "../context/CartContext";
 
 const ITEMS_PER_PAGE = 8;
 
 export default function ShopAllPage() {
   const navigate = useNavigate();
+  const [searchParams, setSearchParams] = useSearchParams();
+  const { addToCart } = useCart();
+
+  const [products, setProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalProducts: 0 });
   const [selectedCategory, setSelectedCategory] = useState("All Products");
   const [sortBy, setSortBy] = useState("Newest Arrivals");
   const [currentPage, setCurrentPage] = useState(1);
   const [isSortOpen, setIsSortOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState(searchParams.get("search") || "");
   const dropdownRef = useRef(null);
 
   const categories = ["All Products", "Men", "Women", "Accessories"];
-  const sortOptions = [
-    "Newest Arrivals",
-    "Price: Low to High",
-    "Price: High to Low",
-  ];
-
-  // Helper to parse price string to number for sorting
-  const parsePrice = (priceStr) => {
-    return parseFloat(priceStr.replace(/[^0-9.]/g, ""));
-  };
+  const sortOptions = ["Newest Arrivals", "Price: Low to High", "Price: High to Low"];
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -35,260 +34,204 @@ export default function ShopAllPage() {
       }
     }
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Filter and Sort logic
-  const filteredAndSortedProducts = useMemo(() => {
-    // 1. Filter by category
-    let items = [...MOCK_PRODUCTS];
-    if (selectedCategory !== "All Products") {
-      items = items.filter((product) => product.category === selectedCategory);
+  // Sync searchTerm when URL changes (without full page reload)
+  useEffect(() => {
+    const newSearch = searchParams.get("search") || "";
+    if (newSearch !== searchTerm) {
+      setSearchTerm(newSearch);
+      setCurrentPage(1);
+      if (newSearch) setSelectedCategory("All Products");
     }
+  }, [searchParams]);
 
-    // 2. Sort items
-    if (sortBy === "Price: Low to High") {
-      items.sort((a, b) => parsePrice(a.price) - parsePrice(b.price));
-    } else if (sortBy === "Price: High to Low") {
-      items.sort((a, b) => parsePrice(b.price) - parsePrice(a.price));
-    } else {
-      // "Newest Arrivals" (Default) - sort by date descending, then ID descending
-      items.sort((a, b) => {
-        const dateA = new Date(a.createdAt).getTime();
-        const dateB = new Date(b.createdAt).getTime();
-        if (dateB !== dateA) return dateB - dateA;
-        return b.id - a.id;
-      });
-    }
+  // Fetch products when filters / search / page change
+  useEffect(() => {
+    const loadProducts = async () => {
+      setLoading(true);
+      try {
+        const params = { page: currentPage, limit: ITEMS_PER_PAGE };
+        if (searchTerm) {
+          params.q = searchTerm;
+          const response = await searchProducts(params);
+          setProducts(response.data.products);
+          setPagination(response.data.pagination);
+        } else {
+          if (selectedCategory !== "All Products") params.category = selectedCategory;
+          params.sort = sortBy;
+          const response = await fetchProducts(params);
+          setProducts(response.data.products);
+          setPagination(response.data.pagination);
+        }
+      } catch (error) {
+        console.error(error);
+        toast.error("Failed to load products.");
+        setProducts([]);
+        setPagination({ currentPage: 1, totalPages: 1, totalProducts: 0 });
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProducts();
+  }, [selectedCategory, sortBy, currentPage, searchTerm]);
 
-    return items;
-  }, [selectedCategory, sortBy]);
-
-  // Handle category pill clicks (resets pagination to page 1)
   const handleCategoryChange = (category) => {
     setSelectedCategory(category);
     setCurrentPage(1);
+    if (searchTerm) {
+      setSearchTerm("");
+      setSearchParams({});
+    }
   };
 
-  // Pagination logic (dynamic based on current filtered items)
-  const totalPages = Math.max(1, Math.ceil(filteredAndSortedProducts.length / ITEMS_PER_PAGE));
-  
-  // Slice products to show only the current page's products
-  const paginatedProducts = useMemo(() => {
-    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
-    return filteredAndSortedProducts.slice(startIndex, startIndex + ITEMS_PER_PAGE);
-  }, [filteredAndSortedProducts, currentPage]);
-
   const handlePageChange = (page) => {
-    if (page >= 1 && page <= totalPages) {
+    if (page >= 1 && page <= pagination.totalPages) {
       setCurrentPage(page);
-      // Smooth scroll to top of product grid area on page change
       window.scrollTo({ top: 0, behavior: "smooth" });
     }
   };
 
+  const handleSortChange = (option) => {
+    setSortBy(option);
+    setIsSortOpen(false);
+    setCurrentPage(1);
+  };
+
+  const handleClearSearch = () => {
+    setSearchTerm("");
+    setSearchParams({});
+    setCurrentPage(1);
+    setSelectedCategory("All Products");
+  };
+
+  const formatPrice = (price) => `$${price.toFixed(2)}`;
+
+  if (loading && products.length === 0) {
+    return (
+      <div className="bg-[#F5F0EB] min-h-screen py-10 px-4 flex items-center justify-center">
+        <div className="text-[#49454f]">Loading products...</div>
+      </div>
+    );
+  }
+
   return (
     <div className="bg-[#F5F0EB] min-h-screen py-10 md:py-16 px-4 sm:px-8 md:px-16 text-[#1d1b20]">
       <div className="max-w-[1440px] mx-auto">
-        
-        {/* -- TODO: Backend Integration ---------------------------------------
-            When integrating the real backend API:
-            1. Replace MOCK_PRODUCTS with a state from a fetch call, RTK Query, or React Query.
-            2. For server-side pagination & filtering, pass query parameters:
-               `GET /api/products?page=${currentPage}&limit=8&category=${selectedCategory}&sort=${sortBy}`
-            3. Make sure to update the pagination and filter states based on metadata returned by the API (e.g. `totalCount`, `totalPages`).
-            -------------------------------------------------------------------- */}
-
-        {/* PAGE HEADER SECTION */}
+        {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
           <div>
             <span className="text-xs font-bold tracking-[0.2em] text-[#4f378a]/70 uppercase block mb-1">
               NEW SEASON
             </span>
-            <h1 className="text-[36px] sm:text-[44px] md:text-[52px] font-extrabold text-[#1d1b20] tracking-tight leading-none">
-              Shop All
+            <h1 className="text-[36px] sm:text-[44px] md:text-[52px] font-extrabold tracking-tight leading-none">
+              {searchTerm ? `Search: “${searchTerm}”` : "Shop All"}
             </h1>
           </div>
-          <p className="max-w-md text-sm sm:text-base text-[#49454f] leading-relaxed md:text-right font-medium">
-            Explore our curated collection of essentials, designed for the modern lifestyle with premium materials.
+          <p className="max-w-md text-sm sm:text-base text-[#49454f] leading-relaxed md:text-right">
+            Explore our curated collection of essentials...
           </p>
         </div>
 
-        {/* CONTROLS SECTION: FILTERS & SORT */}
+        {/* Controls */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#e6e0e9] pb-6 mb-8">
-          
-          {/* Category Filter Pills */}
-          <div className="flex flex-wrap gap-2.5">
-            {categories.map((category) => {
-              const isActive = selectedCategory === category;
-              return (
+          {!searchTerm && (
+            <div className="flex flex-wrap gap-2.5">
+              {categories.map((cat) => (
                 <button
-                  key={category}
-                  onClick={() => handleCategoryChange(category)}
-                  className={`
-                    px-5 py-2.5
-                    text-xs sm:text-sm font-semibold
-                    rounded-full
-                    transition-all duration-300 cursor-pointer border-none
-                    ${
-                      isActive
-                        ? "bg-[#4f378a] text-white shadow-[0_4px_12px_rgba(79,55,138,0.25)] hover:bg-[#5f479a]"
-                        : "bg-[#ece5dd]/80 text-[#49454f] hover:bg-[#ece5dd] hover:text-[#1d1b20]"
-                    }
-                  `}
-                >
-                  {category}
-                </button>
-              );
-            })}
-          </div>
-
-          {/* Sort Dropdown Selector */}
-          <div className="flex items-center gap-3 shrink-0 self-end sm:self-auto">
-            
-            {/* Custom Sort Select dropdown for highly polished visual design */}
-            <div className="relative" ref={dropdownRef}>
-              <button
-                type="button"
-                onClick={() => setIsSortOpen(!isSortOpen)}
-                className="
-                  flex items-center gap-2
-                  px-4 py-2.5
-                  bg-transparent border-none
-                  text-xs sm:text-sm font-semibold text-[#1d1b20]
-                  cursor-pointer hover:opacity-85 transition-opacity
-                "
-              >
-                <span className="text-[#49454f] font-medium mr-1">Sort by:</span>
-                <span>{sortBy}</span>
-                <FiChevronDown
-                  className={`w-4 h-4 text-[#49454f] transition-transform duration-300 ${
-                    isSortOpen ? "rotate-180" : "rotate-0"
+                  key={cat}
+                  onClick={() => handleCategoryChange(cat)}
+                  className={`px-5 py-2.5 text-xs sm:text-sm font-semibold rounded-full transition-all duration-300 ${
+                    selectedCategory === cat
+                      ? "bg-[#4f378a] text-white shadow-md hover:bg-[#5f479a]"
+                      : "bg-[#ece5dd]/80 text-[#49454f] hover:bg-[#ece5dd]"
                   }`}
-                />
-              </button>
-
-              {/* Absolute Dropdown Overlay */}
-              {isSortOpen && (
-                <div
-                  className="
-                    absolute right-0 mt-1.5 w-[200px]
-                    bg-white border border-[#e6e0e9]
-                    rounded-xl shadow-[0_8px_30px_rgba(0,0,0,0.08)]
-                    py-2 z-40
-                    animate-in fade-in slide-in-from-top-2 duration-200
-                  "
                 >
-                  {sortOptions.map((option) => {
-                    const isSelected = sortBy === option;
-                    return (
-                      <button
-                        key={option}
-                        onClick={() => {
-                          setSortBy(option);
-                          setIsSortOpen(false);
-                          setCurrentPage(1); // Reset page on sort change
-                        }}
-                        className={`
-                          w-full text-left px-4 py-2 text-xs sm:text-sm font-semibold border-none cursor-pointer
-                          ${
-                            isSelected
-                              ? "text-[#4f378a] bg-[#f2ecf4]"
-                              : "text-[#49454f] bg-transparent hover:bg-[#F5F0EB] hover:text-[#1d1b20]"
-                          }
-                        `}
-                      >
-                        {option}
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+                  {cat}
+                </button>
+              ))}
             </div>
+          )}
+
+          {searchTerm && (
+            <div className="flex items-center gap-2">
+              <span className="text-xs text-[#49454f]">Results for:</span>
+              <span className="text-sm font-semibold text-[#4f378a]">{searchTerm}</span>
+              <button
+                onClick={handleClearSearch}
+                className="flex items-center gap-1 px-3 py-1.5 bg-white rounded-full border text-xs font-medium hover:bg-[#f2ecf4]"
+              >
+                <FiX className="w-3.5 h-3.5" /> Clear
+              </button>
+            </div>
+          )}
+
+          <div className="relative" ref={dropdownRef}>
+            <button onClick={() => setIsSortOpen(!isSortOpen)} className="flex items-center gap-2 px-4 py-2.5 text-xs sm:text-sm font-semibold">
+              <span className="text-[#49454f]">Sort by:</span> {sortBy}
+              <FiChevronDown className={`transition-transform ${isSortOpen ? "rotate-180" : "rotate-0"}`} />
+            </button>
+            {isSortOpen && (
+              <div className="absolute right-0 mt-1.5 w-[200px] bg-white border rounded-xl shadow-md py-2 z-40">
+                {sortOptions.map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => handleSortChange(opt)}
+                    className={`w-full text-left px-4 py-2 text-sm font-semibold ${sortBy === opt ? "text-[#4f378a] bg-[#f2ecf4]" : "text-[#49454f] hover:bg-[#F5F0EB]"}`}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* PRODUCT GRID */}
-        {paginatedProducts.length > 0 ? (
+        {/* Product Grid */}
+        {products.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 mb-16">
-            {paginatedProducts.map((product) => (
+            {products.map((product) => (
               <SingleProductItem
-                key={product.id}
+                key={product._id}
                 name={product.name}
-                price={product.price}
-                img={product.img}
-                onClick={() => navigate(`/product/${product.id}`)}
-                onAddToCart={() => {
-                  toast.success(`${product.name} added to cart`);
-                }}
+                price={formatPrice(product.price)}
+                img={product.mainImage}
+                onClick={() => navigate(`/product/${product._id}`)}
+                onAddToCart={() => addToCart({ id: product._id, name: product.name, price: product.price, image: product.mainImage }, null, "", 1)}
               />
             ))}
           </div>
         ) : (
-          <div className="text-center py-20 bg-white/40 rounded-3xl border border-dashed border-[#e6e0e9] mb-16">
+          <div className="text-center py-20 bg-white/40 rounded-3xl border border-dashed mb-16">
             <p className="text-base text-[#49454f] font-semibold">
-              No products found in this category.
+              {searchTerm ? `No products found for “${searchTerm}”. Try another keyword.` : "No products in this category."}
             </p>
+            {searchTerm && (
+              <button onClick={handleClearSearch} className="mt-4 px-6 py-2 bg-[#4f378a] text-white rounded-full text-sm">
+                Clear Search
+              </button>
+            )}
           </div>
         )}
 
-        {/* PAGINATION SECTION */}
-        {totalPages > 1 && (
+        {/* Pagination */}
+        {pagination.totalPages > 1 && (
           <div className="flex justify-center items-center gap-2 md:gap-3 py-4">
-            
-            {/* Left Chevron Button */}
-            <button
-              onClick={() => handlePageChange(currentPage - 1)}
-              disabled={currentPage === 1}
-              className={`
-                w-10 h-10 rounded-full border border-[#e6e0e9] bg-white
-                flex items-center justify-center cursor-pointer transition-all duration-300
-                hover:border-[#4f378a] hover:text-[#4f378a]
-                disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-[#e6e0e9] disabled:hover:text-inherit
-              `}
-              aria-label="Previous Page"
-            >
-              <FiChevronLeft className="w-5 h-5" />
+            <button onClick={() => handlePageChange(currentPage - 1)} disabled={currentPage === 1} className="w-10 h-10 rounded-full border bg-white flex items-center justify-center disabled:opacity-40">
+              <FiChevronLeft />
             </button>
-
-            {/* Page Number circles */}
-            {Array.from({ length: totalPages }, (_, index) => {
-              const pageNumber = index + 1;
-              const isPageActive = currentPage === pageNumber;
-              return (
-                <button
-                  key={pageNumber}
-                  onClick={() => handlePageChange(pageNumber)}
-                  className={`
-                    w-10 h-10 rounded-full font-bold text-sm
-                    flex items-center justify-center cursor-pointer border-none transition-all duration-300
-                    ${
-                      isPageActive
-                        ? "bg-[#4f378a] text-white shadow-[0_4px_12px_rgba(79,55,138,0.25)]"
-                        : "bg-transparent text-[#49454f] hover:bg-[#ece5dd] hover:text-[#1d1b20]"
-                    }
-                  `}
-                >
-                  {pageNumber}
-                </button>
-              );
-            })}
-
-            {/* Right Chevron Button */}
-            <button
-              onClick={() => handlePageChange(currentPage + 1)}
-              disabled={currentPage === totalPages}
-              className={`
-                w-10 h-10 rounded-full border border-[#e6e0e9] bg-white
-                flex items-center justify-center cursor-pointer transition-all duration-300
-                hover:border-[#4f378a] hover:text-[#4f378a]
-                disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:border-[#e6e0e9] disabled:hover:text-inherit
-              `}
-              aria-label="Next Page"
-            >
-              <FiChevronRight className="w-5 h-5" />
+            {Array.from({ length: Math.min(pagination.totalPages, 10) }, (_, i) => (
+              <button
+                key={i + 1}
+                onClick={() => handlePageChange(i + 1)}
+                className={`w-10 h-10 rounded-full font-bold text-sm ${currentPage === i + 1 ? "bg-[#4f378a] text-white shadow-md" : "bg-transparent text-[#49454f] hover:bg-[#ece5dd]"}`}
+              >
+                {i + 1}
+              </button>
+            ))}
+            <button onClick={() => handlePageChange(currentPage + 1)} disabled={currentPage === pagination.totalPages} className="w-10 h-10 rounded-full border bg-white flex items-center justify-center disabled:opacity-40">
+              <FiChevronRight />
             </button>
           </div>
         )}

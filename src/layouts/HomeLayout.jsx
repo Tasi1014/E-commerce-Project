@@ -2,6 +2,7 @@ import { Outlet } from "react-router-dom";
 import HomeHeader from "../Components/Header/HomeHeader";
 import HomeFooter from "../Components/Footer/HomeFooter";
 import WishlistDrawer from "../Components/UI/WishlistDrawer";
+import CartDrawer from "../Components/UI/CartDrawer";
 
 export default function HomeLayout() {
   return (
@@ -11,6 +12,9 @@ export default function HomeLayout() {
 
       {/* Slide-over Global Wishlist Drawer */}
       <WishlistDrawer />
+
+      {/* Slide-over Global Cart Drawer */}
+      <CartDrawer />
 
       {/* Main Content Area */}
       <main className="flex-grow">
