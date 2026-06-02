@@ -142,13 +142,40 @@ export const updateStock = async (req, res) => {
 };
 
 // @route   GET /api/admin/products
-// @desc    Get all products (admin only)
+// @desc    Get all products (admin only) with pagination and search
 export const getAllProductsAdmin = async (req, res) => {
   try {
-    const products = await Product.find().sort({ createdAt: -1 });
-    res.json({ success: true, products });
+    const { page = 1, limit = 5, search = "" } = req.query;
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    const query = {};
+    if (search) {
+      query.$or = [
+        { name: { $regex: search, $options: "i" } },
+        { category: { $regex: search, $options: "i" } },
+      ];
+    }
+
+    const totalProducts = await Product.countDocuments(query);
+    const products = await Product.find(query)
+      .sort({ createdAt: -1 })
+      .skip(skip)
+      .limit(limitNum);
+
+    res.json({
+      success: true,
+      products,
+      pagination: {
+        currentPage: pageNum,
+        totalPages: Math.ceil(totalProducts / limitNum),
+        totalProducts,
+        limit: limitNum,
+      },
+    });
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message || 'Server error' });
+    res.status(500).json({ success: false, message: error.message || "Server error" });
   }
 };
 

@@ -2,6 +2,7 @@ import Order from '../models/Order.js';
 import Cart from '../models/Cart.js';
 import Product from '../models/Product.js';
 import User from '../models/User.js';
+import { createOrderFromCart } from '../services/orderService.js';
 
 // Helper: decrement product stock
 const decrementStock = async (productId, quantity) => {
@@ -20,80 +21,21 @@ const restoreStock = async (decrementedItems) => {
   }
 };
 
+
 export const createOrder = async (req, res) => {
   try {
     const userId = req.user.userId;
     const { shippingAddress, paymentMethod, notes } = req.body;
 
-    // Get user's cart
-    const cart = await Cart.findOne({ user: userId });
-    if (!cart || cart.items.length === 0) {
-      return res.status(400).json({ success: false, message: 'Cart is empty' });
+    if (paymentMethod !== 'COD') {
+      return res.status(400).json({ success: false, message: 'Only COD supported here' });
     }
 
-    // Array to track successfully decremented items (for potential rollback)
-    const decrementedItems = [];
-
-    try {
-      // Step 1: Check stock and decrement for each cart item
-      for (const item of cart.items) {
-        await decrementStock(item.product, item.quantity);
-        decrementedItems.push({ productId: item.product, quantity: item.quantity });
-      }
-
-      // Step 2: Prepare order items
-      let subtotal = 0;
-      const orderItems = cart.items.map(item => {
-        const itemTotal = item.price * item.quantity;
-        subtotal += itemTotal;
-        return {
-          productId: item.product,
-          name: item.name,
-          price: item.price,
-          quantity: item.quantity,
-          image: item.image,
-          color: item.colorName || '',
-          size: item.size || '',
-        };
-      });
-
-      const shippingCost = 0;
-      const totalAmount = subtotal + shippingCost;
-
-      // Step 3: Create order
-      const order = await Order.create({
-        user: userId,
-        items: orderItems,
-        shippingAddress,
-        paymentMethod,
-        subtotal,
-        shippingCost,
-        totalAmount,
-        notes: notes || '',
-      });
-
-      // Step 4: Clear cart
-      cart.items = [];
-      await cart.save();
-
-      // Success – no rollback needed
-      res.status(201).json({
-        success: true,
-        message: 'Order placed successfully',
-        order,
-      });
-    } catch (err) {
-      // If any error occurred, restore stock for all products that were decremented
-      if (decrementedItems.length > 0) {
-        await restoreStock(decrementedItems);
-      }
-      // Re-throw to be caught by outer catch
-      throw err;
-    }
+    const order = await createOrderFromCart(userId, shippingAddress, paymentMethod, notes);
+    res.status(201).json({ success: true, order });
   } catch (error) {
-    console.error('Create order error:', error);
-    const message = error.message || 'Server error';
-    res.status(500).json({ success: false, message });
+    console.error('COD order error:', error);
+    res.status(500).json({ success: false, message: error.message });
   }
 };
 
@@ -128,11 +70,82 @@ export const getOrderById = async (req, res) => {
 };
 
 // @route   GET /api/admin/orders
-// @desc    Get all orders (admin only)
+// @desc    Get all orders (admin only) with pagination and search
 export const getAllOrders = async (req, res) => {
   try {
-    const orders = await Order.find().sort({ createdAt: -1 }).populate('user', 'name email');
-    res.json({ success: true, orders });
+    const { page = 1, limit = 5, search = "", status = "All" } = req.query;
+    const pageNum = parseInt(page);
+    const limitNum = parseInt(limit);
+    const skip = (pageNum - 1) * limitNum;
+
+    const query = {};
+    if (status && status !== "All") {
+      query.orderStatus = status;
+    }
+
+    if (search) {
+      // 1. Find user IDs matching customer name or email search
+      const matchedUsers = await User.find({
+        $or: [
+          { name: { $regex: search, $options: "i" } },
+          { email: { $regex: search, $options: "i" } },
+        ],
+      }).select("_id");
+      const matchedUserIds = matchedUsers.map((u) => u._id);
+
+      // 2. Build multi-field search conditions
+      const searchConditions = [
+        { paymentMethod: { $regex: search, $options: "i" } },
+        { notes: { $regex: search, $options: "i" } },
+      ];
+
+      if (matchedUserIds.length > 0) {
+        searchConditions.push({ user: { $in: matchedUserIds } });
+      }
+
+      // Match orders by string representation of ObjectId (_id)
+      searchConditions.push({
+        $expr: {
+          $regexMatch: {
+            input: { $toString: "$_id" },
+            regex: search,
+            options: "i",
+          },
+        },
+      });
+
+      query.$or = searchConditions;
+    }
+
+    const totalOrders = await Order.countDocuments(query);
+    const orders = await Order.find(query)
+      .sort({ createdAt: -1 })
+      .populate("user", "name email")
+      .skip(skip)
+      .limit(limitNum);
+
+    // Global stats counts for quick indicators
+    const globalTotalCount = await Order.countDocuments();
+    const globalPendingCount = await Order.countDocuments({ orderStatus: "Pending" });
+    const globalProcessingCount = await Order.countDocuments({ orderStatus: "Processing" });
+    const globalDeliveredCount = await Order.countDocuments({ orderStatus: "Delivered" });
+
+    res.json({
+      success: true,
+      orders,
+      pagination: {
+        currentPage: pageNum,
+        totalPages: Math.ceil(totalOrders / limitNum),
+        totalOrders,
+        limit: limitNum,
+      },
+      stats: {
+        totalCount: globalTotalCount,
+        pendingCount: globalPendingCount,
+        processingCount: globalProcessingCount,
+        deliveredCount: globalDeliveredCount,
+      },
+    });
   } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
