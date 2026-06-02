@@ -28,6 +28,9 @@ import AdminLayout from "../layouts/AdminLayout.jsx";
 import AdminProducts from "../pages/admin/AdminProducts.jsx";
 import AdminOrders from "../pages/admin/AdminOrders.jsx";
 import AdminCustomers from "../pages/admin/AdminCustomers.jsx";
+import CheckoutPage from "../pages/CheckoutPage.jsx";
+import OrderConfirmationPage from "../pages/OrderConfirmationPage.jsx";
+import OrdersPage from "../pages/OrdersPage.jsx";
 
 const routes = [
   {
@@ -69,6 +72,11 @@ const routes = [
         path: "contact-us",
         Component: ContactUsPage,
       },
+
+      //-Orders
+      { path: "checkout", element: <CheckoutPage/> },
+      { path: "order-confirmation/:orderId", element: <OrderConfirmationPage /> },
+{path: "/orders", element: <OrdersPage/>}
     ],
   },
   {path: "*", Component: NotFound},

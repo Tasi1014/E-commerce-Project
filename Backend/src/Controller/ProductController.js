@@ -120,3 +120,86 @@ export const searchProducts = async (req, res) => {
     res.status(500).json({ success: false, message: 'Server error' });
   }
 };
+
+// @route   PUT /api/products/:id/stock
+// @desc    Update product stock (admin only)
+export const updateStock = async (req, res) => {
+  try {
+    const { stock } = req.body;
+    if (stock === undefined || stock < 0) {
+      return res.status(400).json({ success: false, message: 'Valid stock value required' });
+    }
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      { stock },
+      { new: true }
+    );
+    if (!product) return res.status(404).json({ success: false, message: 'Product not found' });
+    res.json({ success: true, product });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+
+// @route   GET /api/admin/products
+// @desc    Get all products (admin only)
+export const getAllProductsAdmin = async (req, res) => {
+  try {
+    const products = await Product.find().sort({ createdAt: -1 });
+    res.json({ success: true, products });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || 'Server error' });
+  }
+};
+
+// @route   POST /api/admin/products
+// @desc    Create a product (admin only)
+export const createProduct = async (req, res) => {
+  try {
+    const { name, price, category, description, mainImage, images, stock } = req.body;
+    const product = await Product.create({
+      name,
+      price,
+      category,
+      description,
+      mainImage,
+      images: images || [],
+      stock: stock || 0,
+    });
+    res.status(201).json({ success: true, product });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || 'Server error' });
+  }
+};
+
+// @route   PUT /api/admin/products/:id
+// @desc    Update a product (admin only)
+export const updateProduct = async (req, res) => {
+  try {
+    const product = await Product.findByIdAndUpdate(
+      req.params.id,
+      req.body,
+      { new: true }
+    );
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+    res.json({ success: true, product });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || 'Server error' });
+  }
+};
+
+// @route   DELETE /api/admin/products/:id
+// @desc    Delete a product (admin only)
+export const deleteProduct = async (req, res) => {
+  try {
+    const product = await Product.findByIdAndDelete(req.params.id);
+    if (!product) {
+      return res.status(404).json({ success: false, message: 'Product not found' });
+    }
+    res.json({ success: true, message: 'Product deleted successfully' });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message || 'Server error' });
+  }
+};

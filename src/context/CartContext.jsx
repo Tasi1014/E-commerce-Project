@@ -1,135 +1,117 @@
 import { createContext, useContext, useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
+import { useAuth } from "./AuthContext";
+import { fetchCart, addToCartApi, updateCartItemApi, removeCartItemApi } from "../api/CartApi.js";
 
 const CartContext = createContext(null);
 
+// Helper to transform backend cart item to what CartDrawer expects
+const transformCartItem = (item) => ({
+  id: item.product?._id || item.product,   // product ID (for navigation)
+  _id: item._id,                           // cart item ID (for API calls)
+  name: item.name,
+  price: `$${item.price.toFixed(2)}`,      // formatted string e.g. "$420.00"
+  img: item.image,                         // map backend "image" to "img"
+  colorName: item.colorName || "Default",
+  size: item.size || "",
+  quantity: item.quantity,
+});
+
 export function CartProvider({ children }) {
-  const [cart, setCart] = useState(() => {
-    const saved = localStorage.getItem("peak_cart");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const { user } = useAuth();
+  const [cart, setCart] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
-  // Sync with localStorage on change
+  // Load cart from backend when user logs in
   useEffect(() => {
-    localStorage.setItem("peak_cart", JSON.stringify(cart));
-  }, [cart]);
+    if (user) {
+      loadCart();
+    } else {
+      setCart([]);
+    }
+  }, [user]);
 
-  // Helper to parse price string to number
-  const parsePrice = (priceStr) => {
-    if (typeof priceStr === "number") return priceStr;
-    return parseFloat(priceStr.replace(/[^0-9.]/g, "")) || 0;
+  const loadCart = async () => {
+    try {
+      const response = await fetchCart();
+      const items = response.data.cart.items || [];
+      setCart(items.map(transformCartItem));
+    } catch (err) {
+      console.error("Failed to load cart", err);
+      toast.error("Could not load your cart");
+    }
   };
 
-  // Memoized subtotal calculation
+  // Helper to parse price (works with number or formatted string)
+  const parsePrice = (price) => {
+    if (typeof price === "number") return price;
+    return parseFloat(price.replace(/[^0-9.]/g, "")) || 0;
+  };
+
   const subtotal = useMemo(() => {
-    return cart.reduce((total, item) => {
-      return total + parsePrice(item.price) * item.quantity;
-    }, 0);
+    return cart.reduce((total, item) => total + parsePrice(item.price) * item.quantity, 0);
   }, [cart]);
 
-  // Add item to cart
-  const addToCart = (product, color = null, size = "", qty = 1) => {
-    const colorName = color ? (typeof color === "string" ? color : color.name) : "Default";
-    const colorHex = color && typeof color === "object" ? color.hex : "";
+  const addToCart = async (product, color = null, size = "", qty = 1) => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
 
-    setCart((prev) => {
-      // Find matching item in cart by ID, color, and size
-      const existingIdx = prev.findIndex(
-        (item) =>
-          item.id === product.id &&
-          item.colorName === colorName &&
-          item.size === size
-      );
-
-      if (existingIdx > -1) {
-        // Increment quantity of existing item
-        const updated = [...prev];
-        updated[existingIdx].quantity += qty;
-        toast.success(`Updated ${product.name} quantity to ${updated[existingIdx].quantity}`, {
-          action: {
-            label: "View Cart",
-            onClick: () => setIsOpen(true),
-          },
-        });
-        return updated;
-      } else {
-        // Add new item to cart
-        const newItem = {
-          id: product.id,
-          name: product.name,
-          price: product.price,
-          img: product.img,
-          category: product.category,
-          colorName,
-          colorHex,
-          size,
-          quantity: qty,
-        };
-        toast.success(`${product.name} added to cart`, {
-          action: {
-            label: "View Cart",
-            onClick: () => setIsOpen(true),
-          },
-        });
-        return [...prev, newItem];
-      }
-    });
+    try {
+      const response = await addToCartApi(product.id, qty);
+      const newItems = (response.data.cart.items || []).map(transformCartItem);
+      setCart(newItems);
+      toast.success(`${qty} × ${product.name} added to cart`, {
+        action: { label: "View Cart", onClick: () => setIsOpen(true) },
+      });
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Failed to add to cart");
+    }
   };
 
-  // Remove item from cart
-  const removeFromCart = (productId, colorName, size) => {
-    setCart((prev) => {
-      const itemToRemove = prev.find(
-        (item) =>
-          item.id === productId &&
-          item.colorName === colorName &&
-          item.size === size
-      );
-      if (itemToRemove) {
-        toast.info(`${itemToRemove.name} removed from cart`);
-      }
-      return prev.filter(
-        (item) =>
-          !(item.id === productId && item.colorName === colorName && item.size === size)
-      );
-    });
+  const removeFromCart = async (productId, colorName, size) => {
+    if (!user) return;
+    const cartItem = cart.find(item => item.id === productId);
+    if (!cartItem || !cartItem._id) {
+      toast.error("Item not found in cart");
+      return;
+    }
+    try {
+      const response = await removeCartItemApi(cartItem._id);
+      const newItems = (response.data.cart.items || []).map(transformCartItem);
+      setCart(newItems);
+      toast.info("Item removed from cart");
+    } catch (err) {
+      toast.error("Failed to remove item");
+    }
   };
 
-  // Update item quantity inside cart (+1 or -1)
-  const updateQuantity = (productId, colorName, size, delta) => {
-    setCart((prev) => {
-      const idx = prev.findIndex(
-        (item) =>
-          item.id === productId &&
-          item.colorName === colorName &&
-          item.size === size
-      );
-
-      if (idx === -1) return prev;
-
-      const updated = [...prev];
-      const newQty = updated[idx].quantity + delta;
-
-      if (newQty <= 0) {
-        // Remove item if quantity falls to zero or below
-        const itemToRemove = updated[idx];
-        toast.info(`${itemToRemove.name} removed from cart`);
-        return prev.filter(
-          (item) =>
-            !(item.id === productId && item.colorName === colorName && item.size === size)
-        );
-      } else {
-        updated[idx].quantity = newQty;
-        return updated;
+  const updateQuantity = async (productId, colorName, size, delta) => {
+    if (!user) return;
+    const cartItem = cart.find(item => item.id === productId);
+    if (!cartItem || !cartItem._id) return;
+    const newQty = cartItem.quantity + delta;
+    if (newQty <= 0) {
+      await removeFromCart(productId, colorName, size);
+    } else {
+      try {
+        const response = await updateCartItemApi(cartItem._id, newQty);
+        const newItems = (response.data.cart.items || []).map(transformCartItem);
+        setCart(newItems);
+      } catch (err) {
+        toast.error("Failed to update quantity");
       }
-    });
+    }
   };
 
   const clearCart = () => {
-    setCart([]);
-    toast.info("Cart cleared");
+    if (!user) return;
+    toast.info("Clear all not implemented");
   };
+
+  const closeLoginModal = () => setShowLoginModal(false);
 
   return (
     <CartContext.Provider
@@ -142,6 +124,8 @@ export function CartProvider({ children }) {
         isOpen,
         setIsOpen,
         subtotal,
+        showLoginModal,
+        closeLoginModal,
       }}
     >
       {children}
@@ -151,8 +135,6 @@ export function CartProvider({ children }) {
 
 export function useCart() {
   const context = useContext(CartContext);
-  if (!context) {
-    throw new Error("useCart must be used within a CartProvider");
-  }
+  if (!context) throw new Error("useCart must be used within a CartProvider");
   return context;
 }

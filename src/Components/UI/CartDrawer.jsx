@@ -37,17 +37,14 @@ export default function CartDrawer() {
   };
 
   const handleCheckout = () => {
-    setIsOpen(false);
-    if (user) {
-      toast.success("Proceeding to checkout...", {
-        description: "Checking database stock and initializing order payload...",
-      });
-      // Future integration: redirect to actual checkout page
-    } else {
-      toast.warning("Please login to proceed to checkout.");
-      navigate("/login");
-    }
-  };
+  setIsOpen(false); // close the drawer
+  if (user) {
+    navigate("/checkout");
+  } else {
+    toast.warning("Please login to proceed to checkout.");
+    navigate("/login");
+  }
+};
 
   return (
     <>

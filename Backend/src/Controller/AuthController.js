@@ -194,3 +194,15 @@ export const adminLogin = async (req, res) => {
 export const logout = (req, res) => {
   res.json({ success: true, message: 'Logged out successfully' });
 };
+
+// @route   GET /api/admin/users
+// @desc    Get all users (admin only)
+export const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select('-password').sort({ createdAt: -1 });
+    res.json({ success: true, users });
+  } catch (error) {
+    console.error('Get all users error:', error);
+    res.status(500).json({ success: false, message: error.message || 'Server error' });
+  }
+};

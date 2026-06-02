@@ -36,6 +36,7 @@ export default function FormInput({
   type = "text",
   placeholder,
   errors,
+  dark = false,
 }) {
   // Local state ONLY for the password visibility toggle (UI concern, not form state)
   const [showPassword, setShowPassword] = useState(false);
@@ -51,7 +52,11 @@ export default function FormInput({
     <div className="mb-1 relative w-full">
       {/* ── Label ── */}
       {label && (
-        <label className="block text-[10px] font-bold uppercase tracking-wider text-[#49454f] mb-2 text-left">
+        <label
+          className={`block text-[10px] font-bold uppercase tracking-wider mb-2 text-left ${
+            dark ? "text-[#9ca3af]" : "text-[#49454f]"
+          }`}
+        >
           {label}
         </label>
       )}
@@ -61,7 +66,9 @@ export default function FormInput({
         className={`relative flex items-center border-b transition-colors duration-200 ${
           errorMessage
             ? "border-red-400"                     // Red border when there's an error
-            : "border-[#e6e0e9] focus-within:border-[#4f378a]" // Purple on focus
+            : dark
+            ? "border-white/[0.08] focus-within:border-[#7c5cbf]/60" // Purple/violet in dark admin mode
+            : "border-[#e6e0e9] focus-within:border-[#4f378a]" // Purple on light mode focus
         }`}
       >
         {/*
@@ -81,7 +88,11 @@ export default function FormInput({
               {...field} // spread all RHF field props (value, onChange, onBlur, ref, name)
               type={inputType}
               placeholder={placeholder}
-              className="w-full pb-2 pt-1 text-sm bg-transparent outline-none border-none text-[#1d1b20] placeholder-[#7a7582] transition-colors duration-200"
+              className={`w-full pb-2 pt-1 text-sm bg-transparent outline-none border-none transition-colors duration-200 ${
+                dark
+                  ? "text-[#e8e3f0] placeholder-[#6b7280]"
+                  : "text-[#1d1b20] placeholder-[#7a7582]"
+              }`}
             />
           )}
         />
@@ -91,7 +102,11 @@ export default function FormInput({
           <button
             type="button"
             onClick={() => setShowPassword((prev) => !prev)}
-            className="absolute right-0 bottom-2 text-[#49454f] hover:text-[#4f378a] bg-transparent border-none cursor-pointer flex items-center justify-center p-1 transition-colors duration-200"
+            className={`absolute right-0 bottom-2 bg-transparent border-none cursor-pointer flex items-center justify-center p-1 transition-colors duration-200 ${
+              dark
+                ? "text-[#6b7280] hover:text-[#7c5cbf]"
+                : "text-[#49454f] hover:text-[#4f378a]"
+            }`}
             aria-label={showPassword ? "Hide password" : "Show password"}
           >
             {showPassword ? <FiEyeOff size={18} /> : <FiEye size={18} />}

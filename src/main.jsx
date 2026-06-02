@@ -8,10 +8,10 @@ createRoot(document.getElementById("root")).render(
   <StrictMode>
     {/* Sonner toast portal — mounted once at root, available on every page */}
     <Toaster
-      position="top-right"
+      position="bottom-right"
       richColors
       expand={false}
-      duration={4000}
+      duration={3000}
       toastOptions={{
         style: { fontFamily: "inherit", fontSize: "13px" },
       }}

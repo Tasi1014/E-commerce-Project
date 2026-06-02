@@ -1,43 +1,69 @@
 import { createContext, useContext, useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useAuth } from "./AuthContext";
+import { fetchWishlist, addToWishlistApi, removeFromWishlistApi } from "../api/wishlistApi";
 
 const WishlistContext = createContext(null);
 
+// Transform backend product object to frontend format
+const transformWishlistItem = (product) => ({
+  id: product._id,
+  name: product.name,
+  price: `$${product.price.toFixed(2)}`,
+  img: product.mainImage,
+  category: product.category,
+});
+
 export function WishlistProvider({ children }) {
-  const [wishlist, setWishlist] = useState(() => {
-    // Persistent wishlist storage in localStorage
-    const saved = localStorage.getItem("peak_wishlist");
-    return saved ? JSON.parse(saved) : [];
-  });
+  const { user } = useAuth();
+  const [wishlist, setWishlist] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
-  // Sync with localStorage on change
+  // Load wishlist from backend when user logs in
   useEffect(() => {
-    localStorage.setItem("peak_wishlist", JSON.stringify(wishlist));
-  }, [wishlist]);
+    if (user) {
+      loadWishlist();
+    } else {
+      setWishlist([]);
+    }
+  }, [user]);
 
-  // Toggle dynamic wishlist updates with interactive toasts
-  const toggleWishlist = (product) => {
-    setWishlist((prev) => {
-      const exists = prev.some((item) => item.id === product.id);
-      if (exists) {
+  const loadWishlist = async () => {
+    try {
+      const response = await fetchWishlist();
+      const products = response.data.wishlist.products || [];
+      setWishlist(products.map(transformWishlistItem));
+    } catch (err) {
+      console.error("Failed to load wishlist", err);
+      toast.error("Could not load your wishlist");
+    }
+  };
+
+  const toggleWishlist = async (product) => {
+    if (!user) {
+      setShowLoginModal(true);
+      return;
+    }
+
+    const isPresent = wishlist.some((item) => item.id === product.id);
+    try {
+      if (isPresent) {
+        await removeFromWishlistApi(product.id);
+        await loadWishlist();
         toast.info(`${product.name} removed from wishlist`, {
-          action: {
-            label: "Undo",
-            onClick: () => toggleWishlist(product),
-          },
+          action: { label: "Undo", onClick: () => toggleWishlist(product) },
         });
-        return prev.filter((item) => item.id !== product.id);
       } else {
+        await addToWishlistApi(product.id);
+        await loadWishlist();
         toast.success(`${product.name} added to wishlist`, {
-          action: {
-            label: "View Wishlist",
-            onClick: () => setIsOpen(true),
-          },
+          action: { label: "View Wishlist", onClick: () => setIsOpen(true) },
         });
-        return [...prev, product];
       }
-    });
+    } catch (err) {
+      toast.error(err.response?.data?.message || "Wishlist operation failed");
+    }
   };
 
   const isWishlisted = (productId) => {
@@ -45,9 +71,11 @@ export function WishlistProvider({ children }) {
   };
 
   const clearWishlist = () => {
-    setWishlist([]);
-    toast.info("Wishlist cleared");
+    if (!user) return;
+    toast.info("Clear all not implemented for wishlist");
   };
+
+  const closeLoginModal = () => setShowLoginModal(false);
 
   return (
     <WishlistContext.Provider
@@ -58,6 +86,8 @@ export function WishlistProvider({ children }) {
         isOpen,
         setIsOpen,
         clearWishlist,
+        showLoginModal,
+        closeLoginModal,
       }}
     >
       {children}
@@ -67,8 +97,6 @@ export function WishlistProvider({ children }) {
 
 export function useWishlist() {
   const context = useContext(WishlistContext);
-  if (!context) {
-    throw new Error("useWishlist must be used within a WishlistProvider");
-  }
+  if (!context) throw new Error("useWishlist must be used within a WishlistProvider");
   return context;
 }

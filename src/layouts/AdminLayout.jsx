@@ -42,11 +42,19 @@ export default function AdminLayout() {
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [darkMode, setDarkMode]       = useState(true);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
-  const [searchQuery, setSearchQuery]   = useState("");
 
   const userMenuRef = useRef(null);
-  const { user, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (!loading) {
+      if (!user || user.role !== 'admin') {
+        toast.error("Access denied. Admin authorization required.");
+        navigate("/login", { replace: true });
+      }
+    }
+  }, [user, loading, navigate]);
 
   /* Close user-menu on outside click */
   useEffect(() => {
@@ -77,6 +85,21 @@ export default function AdminLayout() {
   /* ── Sidebar width tokens ───────────────────── */
   const sidebarW   = sidebarOpen ? "w-[220px]" : "w-[64px]";
   const mainLeft   = sidebarOpen ? "ml-[220px]" : "ml-[64px]";
+
+  if (loading) {
+    return (
+      <div className="flex h-screen items-center justify-center bg-[#0f0f13] text-[#e8e3f0] font-sans">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-[#7c5cbf] border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <p className="text-xs font-bold tracking-wider uppercase text-[#6b7280]">Verifying credentials...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!user || user.role !== 'admin') {
+    return null;
+  }
 
   return (
     <div className="flex h-screen overflow-hidden bg-[#0f0f13] text-[#e8e3f0] font-sans">
@@ -169,24 +192,6 @@ export default function AdminLayout() {
         {/* ── Sticky Top Header ─────────────────── */}
         <header className="sticky top-0 z-30 h-[60px] bg-[#131318]/90 backdrop-blur-md border-b border-white/[0.06] flex items-center px-6 gap-4 shrink-0">
 
-          {/* Search bar */}
-          <div className="flex-1 max-w-[420px] relative">
-            <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-[#6b7280]" />
-            <input
-              id="admin-search"
-              type="text"
-              placeholder="Search entries, orders or customers..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="
-                w-full pl-9 pr-4 py-2 rounded-xl
-                bg-white/[0.06] border border-white/[0.08]
-                text-sm text-[#e8e3f0] placeholder-[#6b7280]
-                outline-none focus:border-[#7c5cbf]/60 focus:bg-white/[0.08]
-                transition-all duration-200
-              "
-            />
-          </div>
 
           {/* Spacer */}
           <div className="flex-1" />
