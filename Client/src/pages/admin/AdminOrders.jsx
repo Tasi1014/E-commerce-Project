@@ -18,14 +18,46 @@ export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
   const [statusFilter, setStatus] = useState("All");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const limit = 5;
+  const [stats, setStats] = useState({
+    totalCount: 0,
+    pendingCount: 0,
+    processingCount: 0,
+    deliveredCount: 0,
+  });
+
+  // Debounce search query to avoid redundant API requests
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+      setCurrentPage(1);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [search]);
 
   const fetchOrders = async (showToast = false) => {
     try {
       setLoading(true);
-      const res = await axiosInstance.get("/admin/orders");
+      const res = await axiosInstance.get("/admin/orders", {
+        params: {
+          page: currentPage,
+          limit,
+          search: debouncedSearch,
+          status: statusFilter,
+        },
+      });
       if (res.data.success) {
         setOrders(res.data.orders);
+        setTotalPages(res.data.pagination.totalPages);
+        setTotalOrders(res.data.pagination.totalOrders);
+        if (res.data.stats) {
+          setStats(res.data.stats);
+        }
         if (showToast) {
           toast.success("Orders list updated successfully");
         }
@@ -38,18 +70,17 @@ export default function AdminOrders() {
     }
   };
 
+  // Refetch when page, search query, or status filter changes
   useEffect(() => {
     fetchOrders();
-  }, []);
+  }, [currentPage, debouncedSearch, statusFilter]);
 
   const handleStatusChange = async (orderId, newStatus) => {
     try {
       const res = await axiosInstance.put(`/admin/orders/${orderId}/status`, { status: newStatus });
       if (res.data.success) {
         toast.success(`Order status updated to ${newStatus}`);
-        setOrders((prevOrders) =>
-          prevOrders.map((o) => (o._id === orderId ? { ...o, orderStatus: newStatus } : o))
-        );
+        fetchOrders();
       }
     } catch (err) {
       console.error("Error updating status:", err);
@@ -58,29 +89,16 @@ export default function AdminOrders() {
     }
   };
 
-  const filtered = orders.filter((o) => {
-    const orderIdShort = o._id.slice(-8).toUpperCase();
-    const customerName = o.user?.name || "";
-    const customerEmail = o.user?.email || "";
-    const matchSearch =
-      orderIdShort.includes(search.toUpperCase()) ||
-      customerName.toLowerCase().includes(search.toLowerCase()) ||
-      customerEmail.toLowerCase().includes(search.toLowerCase());
-    const matchStatus = statusFilter === "All" || o.orderStatus === statusFilter;
-    return matchSearch && matchStatus;
-  });
-
-  /* Calculate quick stats */
-  const totalCount = orders.length;
-  const pendingCount = orders.filter((o) => o.orderStatus === "Pending").length;
-  const processingCount = orders.filter((o) => o.orderStatus === "Processing").length;
-  const deliveredCount = orders.filter((o) => o.orderStatus === "Delivered").length;
+  const handleStatusFilterChange = (newStatus) => {
+    setStatus(newStatus);
+    setCurrentPage(1);
+  };
 
   const ORDER_STATS = [
-    { label: "Total Orders", value: totalCount, color: "#7c5cbf" },
-    { label: "Pending", value: pendingCount, color: "#facc15" },
-    { label: "Processing", value: processingCount, color: "#fb923c" },
-    { label: "Delivered", value: deliveredCount, color: "#22d3ee" },
+    { label: "Total Orders", value: stats.totalCount, color: "#7c5cbf" },
+    { label: "Pending", value: stats.pendingCount, color: "#facc15" },
+    { label: "Processing", value: stats.processingCount, color: "#fb923c" },
+    { label: "Delivered", value: stats.deliveredCount, color: "#22d3ee" },
   ];
 
   const columns = [
@@ -194,7 +212,7 @@ export default function AdminOrders() {
             {STATUSES.map((s) => (
               <button
                 key={s}
-                onClick={() => setStatus(s)}
+                onClick={() => handleStatusFilterChange(s)}
                 className={`px-3.5 py-2 rounded-xl text-xs font-bold transition-all border-none cursor-pointer ${
                   statusFilter === s
                     ? "bg-[#4f378a] text-white shadow-sm"
@@ -211,10 +229,37 @@ export default function AdminOrders() {
       {/* Table container */}
       <DataTable
         columns={columns}
-        data={filtered}
+        data={orders}
         loading={loading}
         emptyMessage="No orders found matching your search."
       />
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/[0.06] pt-4 px-1">
+          <div className="text-xs text-[#9ca3af]">
+            Showing <span className="font-bold text-white">{Math.min((currentPage - 1) * limit + 1, totalOrders)}</span> to{" "}
+            <span className="font-bold text-white">{Math.min(currentPage * limit, totalOrders)}</span> of{" "}
+            <span className="font-bold text-white">{totalOrders}</span> entries
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1 || loading}
+              className="px-4 py-2 bg-white/[0.06] hover:bg-white/[0.1] disabled:opacity-40 disabled:hover:bg-white/[0.06] disabled:cursor-not-allowed border border-white/[0.08] text-xs font-bold rounded-xl text-white transition-all cursor-pointer"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages || loading}
+              className="px-4 py-2 bg-[#4f378a] hover:bg-[#5f479a] disabled:opacity-40 disabled:hover:bg-[#4f378a] disabled:cursor-not-allowed text-xs font-bold rounded-xl text-white border-none transition-all cursor-pointer shadow-[0_4px_14px_rgba(79,55,138,0.2)]"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

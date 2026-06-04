@@ -5,13 +5,12 @@ import { fetchCart, addToCartApi, updateCartItemApi, removeCartItemApi } from ".
 
 const CartContext = createContext(null);
 
-// Helper to transform backend cart item to what CartDrawer expects
 const transformCartItem = (item) => ({
-  id: item.product?._id || item.product,   // product ID (for navigation)
-  _id: item._id,                           // cart item ID (for API calls)
+  id: item.product?._id || item.product,
+  _id: item._id,
   name: item.name,
-  price: `$${item.price.toFixed(2)}`,      // formatted string e.g. "$420.00"
-  img: item.image,                         // map backend "image" to "img"
+  price: `$${item.price.toFixed(2)}`,
+  img: item.image,
   colorName: item.colorName || "Default",
   size: item.size || "",
   quantity: item.quantity,
@@ -23,7 +22,6 @@ export function CartProvider({ children }) {
   const [isOpen, setIsOpen] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  // Load cart from backend when user logs in
   useEffect(() => {
     if (user) {
       loadCart();
@@ -43,7 +41,6 @@ export function CartProvider({ children }) {
     }
   };
 
-  // Helper to parse price (works with number or formatted string)
   const parsePrice = (price) => {
     if (typeof price === "number") return price;
     return parseFloat(price.replace(/[^0-9.]/g, "")) || 0;
@@ -106,9 +103,9 @@ export function CartProvider({ children }) {
     }
   };
 
+
   const clearCart = () => {
-    if (!user) return;
-    toast.info("Clear all not implemented");
+    setCart([]);
   };
 
   const closeLoginModal = () => setShowLoginModal(false);
@@ -121,6 +118,7 @@ export function CartProvider({ children }) {
         removeFromCart,
         updateQuantity,
         clearCart,
+        loadCart,         
         isOpen,
         setIsOpen,
         subtotal,

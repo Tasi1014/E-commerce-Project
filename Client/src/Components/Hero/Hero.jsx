@@ -15,23 +15,22 @@ export default function Hero() {
   ];
 
   return (
-    <section className="bg-[#111111] min-h-screen flex items-center overflow-hidden">
+    <section className="bg-[#F5F0EB] min-h-screen flex items-center overflow-hidden">
       <div className="max-w-[1440px] mx-auto px-16 py-20 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center w-full">
         {/* Text Section */}
         <div className="z-10">
-          <h1 className="text-[64px] lg:text-[72px] font-extrabold text-white leading-[1.05] mb-8 tracking-tight">
+          <h1 className="text-[64px] lg:text-[72px] font-extrabold text-black leading-[1.05] mb-8 tracking-tight">
             Elevate Your <br />
             <span className="text-[#4f378a]">Everyday Style</span>
           </h1>
-          <p className="text-lg text-white/60 leading-relaxed mb-10 max-w-[420px]">
+          <p className="text-lg text-black leading-relaxed mb-10 max-w-[420px]">
             Experience curated minimalism with our new collection designed for
             the modern individual. Timeless pieces, modern silhouettes.
           </p>
           <div className="flex flex-wrap gap-5">
             <ButtonLink to="/shop-all" text="Show now"></ButtonLink>
-            <button className="px-10 py-4 bg-white/5 text-white text-sm font-bold rounded-xl cursor-pointer border border-white/10 hover:bg-white/10 transition-all hover:scale-105 duration-300 backdrop-blur-sm">
-              Explore Collection
-            </button>
+            
+            <ButtonLink to="/shop-all" text="Explore"></ButtonLink>
           </div>
 
           <div className="mt-16 flex items-center gap-6">
@@ -41,12 +40,12 @@ export default function Hero() {
                   key={i}
                   className="w-10 h-10 rounded-full border-2 border-[#111111] bg-neutral-800 overflow-hidden"
                 >
-                  <div className="w-full h-full bg-linear-to-tr from-[#4f378a] to-pink-500/50 opacity-80" />
+                  <div className="w-full h-full bg-linear-to-tr opacity-80" />
                 </div>
               ))}
             </div>
-            <p className="text-sm text-white/40">
-              <span className="text-white font-medium">2.5k+</span> styles
+            <p className="text-sm text-black">
+              <span className="text-black font-medium">2.5k+</span> styles
               already curated
             </p>
           </div>
@@ -97,7 +96,7 @@ export default function Hero() {
                           New Arrival
                         </span>
                         <h3 className="text-lg font-bold text-white uppercase tracking-tight leading-tight">
-                          Summer '26 <br /> Collection
+                          Summer 2026 <br /> Collection
                         </h3>
                       </div>
                     </div>

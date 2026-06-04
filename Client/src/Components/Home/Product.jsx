@@ -1,8 +1,8 @@
-import { toast } from "sonner";
+import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SingleProductItem from "../Product/SingleProductGridItem";
-import { MOCK_PRODUCTS } from "../../data/products";
 import { useCart } from "../../context/CartContext";
+import { fetchProducts } from "../../api/productApi";
 
 const collections = [
   {
@@ -22,9 +22,26 @@ const collections = [
 export default function ProductSection() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Use the first 4 products from the centralized database as Featured Essentials
-  const featuredProducts = MOCK_PRODUCTS.slice(0, 4);
+  // Fetch featured essentials dynamically from the backend (limit 4)
+  useEffect(() => {
+    const getFeatured = async () => {
+      try {
+        setLoading(true);
+        const res = await fetchProducts({ limit: 4 });
+        if (res.data.success) {
+          setFeaturedProducts(res.data.products);
+        }
+      } catch (err) {
+        console.error("Error fetching featured products:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    getFeatured();
+  }, []);
 
   return (
     <>
@@ -34,6 +51,7 @@ export default function ProductSection() {
           {collections.map(({ label, img }) => (
             <div
               key={label}
+              onClick={() => navigate(`/shop-all?category=${label}`)}
               className="relative rounded-2xl overflow-hidden h-[420px] cursor-pointer group"
             >
               <img
@@ -80,20 +98,40 @@ export default function ProductSection() {
             </Link>
           </div>
 
-          {/* Reusable product cards */}
+          {/* Dynamic/Reusable product cards */}
           <div className="grid grid-cols-4 gap-6">
-            {featuredProducts.map((product) => (
-              <SingleProductItem
-                key={product.id}
-                name={product.name}
-                price={product.price}
-                img={product.img}
-                onClick={() => navigate(`/product/${product.id}`)}
-                onAddToCart={() => {
-                  addToCart(product, product.colors?.[0] || null, product.sizes?.[0] || "", 1);
-                }}
-              />
-            ))}
+            {loading ? (
+              <div className="col-span-4 text-center py-12 text-sm font-semibold text-[#49454f]">
+                Loading essentials...
+              </div>
+            ) : featuredProducts.length > 0 ? (
+              featuredProducts.map((product) => (
+                <SingleProductItem
+                  key={product._id}
+                  name={product.name}
+                  price={`$${product.price.toFixed(2)}`}
+                  img={product.mainImage}
+                  onClick={() => navigate(`/product/${product._id}`)}
+                  onAddToCart={() => {
+                    addToCart(
+                      {
+                        id: product._id,
+                        name: product.name,
+                        price: product.price,
+                        image: product.mainImage,
+                      },
+                      null,
+                      "",
+                      1
+                    );
+                  }}
+                />
+              ))
+            ) : (
+              <div className="col-span-4 text-center py-12 text-sm font-semibold text-[#49454f]">
+                No featured essentials found.
+              </div>
+            )}
           </div>
         </div>
       </section>

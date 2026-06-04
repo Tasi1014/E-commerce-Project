@@ -10,7 +10,7 @@
  */
 
 import { useState, useEffect, useRef } from "react";
-import { Outlet, NavLink, useNavigate } from "react-router-dom";
+import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   FiGrid,
   FiPackage,
@@ -44,8 +44,18 @@ export default function AdminLayout() {
   const [userMenuOpen, setUserMenuOpen] = useState(false);
 
   const userMenuRef = useRef(null);
+  const mainScrollRef = useRef(null);
+  const location = useLocation();
   const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
+
+  // Scroll to top of the admin content panel on every route change
+  useEffect(() => {
+    if (mainScrollRef.current) {
+      mainScrollRef.current.scrollTop = 0;
+    }
+    window.scrollTo(0, 0);
+  }, [location.pathname]);
 
   useEffect(() => {
     if (!loading) {
@@ -251,7 +261,7 @@ export default function AdminLayout() {
         </header>
 
         {/* ── Page Content (Outlet) ──────────────── */}
-        <main className="flex-1 overflow-y-auto p-6 md:p-8">
+        <main ref={mainScrollRef} className="flex-1 overflow-y-auto p-6 md:p-8">
           <Outlet />
         </main>
       </div>

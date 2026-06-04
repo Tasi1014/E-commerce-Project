@@ -2,11 +2,18 @@ import { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { fetchOrderById } from '../api/orderApi';
+import { useCart } from '../context/CartContext';
 
 export default function OrderConfirmationPage() {
   const { orderId } = useParams();
+  const { loadCart } = useCart();  
   const [order, setOrder] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Refresh cart when page loads – ensures badge shows 0 after Stripe order
+  useEffect(() => {
+    loadCart();
+  }, [loadCart]);
 
   useEffect(() => {
     const fetchOrder = async () => {

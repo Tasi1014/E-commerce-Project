@@ -16,7 +16,7 @@ export default function ShopAllPage() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [pagination, setPagination] = useState({ currentPage: 1, totalPages: 1, totalProducts: 0 });
-  const [selectedCategory, setSelectedCategory] = useState("All Products");
+  const [selectedCategory, setSelectedCategory] = useState(searchParams.get("category") || "All Products");
   const [sortBy, setSortBy] = useState("Newest Arrivals");
   const [currentPage, setCurrentPage] = useState(1);
   const [isSortOpen, setIsSortOpen] = useState(false);
@@ -37,13 +37,20 @@ export default function ShopAllPage() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  // Sync searchTerm when URL changes (without full page reload)
+  // Sync state when URL query params change (navigating from other pages)
   useEffect(() => {
     const newSearch = searchParams.get("search") || "";
+    const newCategory = searchParams.get("category") || "All Products";
+
     if (newSearch !== searchTerm) {
       setSearchTerm(newSearch);
       setCurrentPage(1);
       if (newSearch) setSelectedCategory("All Products");
+    }
+
+    if (!newSearch && newCategory !== selectedCategory) {
+      setSelectedCategory(newCategory);
+      setCurrentPage(1);
     }
   }, [searchParams]);
 
@@ -82,7 +89,12 @@ export default function ShopAllPage() {
     setCurrentPage(1);
     if (searchTerm) {
       setSearchTerm("");
+    }
+    // Sync the category into the URL so back-navigation/sharing works
+    if (category === "All Products") {
       setSearchParams({});
+    } else {
+      setSearchParams({ category });
     }
   };
 

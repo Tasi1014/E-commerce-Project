@@ -7,7 +7,7 @@
  * Auth pages (Login, Register) now live in src/pages/auth/
  * and use the React Hook Form + Zod pattern.
  */
-
+import OrderSuccessPage from "../pages/OrderSuccessPage";
 import HomeLayout from "../layouts/HomeLayout.jsx";
 import HomePage from "../pages/home/HomePage.jsx";
 
@@ -74,8 +74,10 @@ const routes = [
       },
 
       //-Orders
-      { path: "checkout", element: <CheckoutPage/> },
+        { path: "checkout", element: <CheckoutPage/> },
       { path: "order-confirmation/:orderId", element: <OrderConfirmationPage /> },
+      { path: "order-success", Component: OrderSuccessPage },
+
 {path: "/orders", element: <OrdersPage/>}
     ],
   },

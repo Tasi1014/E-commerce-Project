@@ -9,15 +9,38 @@ export default function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalProducts, setTotalProducts] = useState(0);
+  const limit = 5;
+
   const [modalOpen, setModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
+
+  // Debounce search query to avoid redundant API requests
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearch(search);
+      setCurrentPage(1);
+    }, 300);
+    return () => clearTimeout(handler);
+  }, [search]);
 
   const fetchProducts = async (showToast = false) => {
     try {
       setLoading(true);
-      const res = await axiosInstance.get("/admin/products");
+      const res = await axiosInstance.get("/admin/products", {
+        params: {
+          page: currentPage,
+          limit,
+          search: debouncedSearch,
+        },
+      });
       if (res.data.success) {
         setProducts(res.data.products);
+        setTotalPages(res.data.pagination.totalPages);
+        setTotalProducts(res.data.pagination.totalProducts);
         if (showToast) {
           toast.success("Products directory refreshed successfully");
         }
@@ -30,9 +53,10 @@ export default function AdminProducts() {
     }
   };
 
+  // Refetch when page or debounced search matches change
   useEffect(() => {
     fetchProducts();
-  }, []);
+  }, [currentPage, debouncedSearch]);
 
   const handleDeleteProduct = async (productId) => {
     if (!window.confirm("Are you sure you want to delete this product?")) return;
@@ -41,19 +65,13 @@ export default function AdminProducts() {
       const res = await axiosInstance.delete(`/admin/products/${productId}`);
       if (res.data.success) {
         toast.success("Product deleted successfully");
-        setProducts((prev) => prev.filter((p) => p._id !== productId));
+        fetchProducts();
       }
     } catch (err) {
       console.error("Error deleting product:", err);
       toast.error(err.response?.data?.message || "Failed to delete product");
     }
   };
-
-  const filtered = products.filter(
-    (p) =>
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.category.toLowerCase().includes(search.toLowerCase())
-  );
 
   const columns = [
     {
@@ -152,7 +170,7 @@ export default function AdminProducts() {
       <div className="flex flex-col sm:flex-row justify-between gap-4 items-start sm:items-center">
         <div>
           <h1 className="text-2xl font-extrabold text-white tracking-tight">Products</h1>
-          <p className="text-sm text-[#9ca3af] mt-0.5">{products.length} products total</p>
+          <p className="text-sm text-[#9ca3af] mt-0.5">{totalProducts} products total</p>
         </div>
         <div className="flex gap-2">
           <button
@@ -192,10 +210,37 @@ export default function AdminProducts() {
       {/* Products table container utilizing custom Dark DataTable */}
       <DataTable
         columns={columns}
-        data={filtered}
+        data={products}
         loading={loading}
         emptyMessage="No products found in the catalog matching your query."
       />
+
+      {/* Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-white/[0.06] pt-4 px-1">
+          <div className="text-xs text-[#9ca3af]">
+            Showing <span className="font-bold text-white">{Math.min((currentPage - 1) * limit + 1, totalProducts)}</span> to{" "}
+            <span className="font-bold text-white">{Math.min(currentPage * limit, totalProducts)}</span> of{" "}
+            <span className="font-bold text-white">{totalProducts}</span> entries
+          </div>
+          <div className="flex gap-2">
+            <button
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
+              disabled={currentPage === 1 || loading}
+              className="px-4 py-2 bg-white/[0.06] hover:bg-white/[0.1] disabled:opacity-40 disabled:hover:bg-white/[0.06] disabled:cursor-not-allowed border border-white/[0.08] text-xs font-bold rounded-xl text-white transition-all cursor-pointer"
+            >
+              Previous
+            </button>
+            <button
+              onClick={() => setCurrentPage((prev) => Math.min(prev + 1, totalPages))}
+              disabled={currentPage === totalPages || loading}
+              className="px-4 py-2 bg-[#4f378a] hover:bg-[#5f479a] disabled:opacity-40 disabled:hover:bg-[#4f378a] disabled:cursor-not-allowed text-xs font-bold rounded-xl text-white border-none transition-all cursor-pointer shadow-[0_4px_14px_rgba(79,55,138,0.2)]"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Add / Edit Product Modal */}
       <ProductFormModal

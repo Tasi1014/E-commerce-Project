@@ -5,8 +5,8 @@ import { toast } from "sonner";
 import { FiX } from "react-icons/fi";
 import axiosInstance from "../../api/axiosInstance";
 import { productSchema } from "../../Validation/admin/productSchema";
-import FormInput from "../../Components/form/FormInput";
-import FormButton from "../../Components/form/FormButton";
+import FormInput from "../../components/form/FormInput";
+import FormButton from "../../components/form/FormButton";
 
 export default function ProductFormModal({ isOpen, onClose, onSuccess, product = null }) {
   const isEditMode = !!product;

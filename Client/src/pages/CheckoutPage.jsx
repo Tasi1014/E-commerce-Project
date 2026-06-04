@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { createOrder } from '../api/orderApi';
+import { createStripeCheckoutSession } from '../api/paymentApi';
 
 export default function CheckoutPage() {
   const { cart, subtotal, clearCart, setIsOpen } = useCart();
@@ -11,6 +12,7 @@ export default function CheckoutPage() {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
+  const [stripeLoading, setStripeLoading] = useState(false);
   const [formData, setFormData] = useState({
     fullName: user?.name || '',
     email: user?.email || '',
@@ -33,6 +35,7 @@ export default function CheckoutPage() {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  // COD flow
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!user) {
@@ -57,7 +60,7 @@ export default function CheckoutPage() {
           city: formData.city,
           state: formData.state,
         },
-        paymentMethod,
+        paymentMethod: 'COD',
         notes: formData.notes,
       };
 
@@ -71,6 +74,48 @@ export default function CheckoutPage() {
       toast.error(err.response?.data?.message || 'Failed to place order');
     } finally {
       setLoading(false);
+    }
+  };
+
+  // Stripe flow
+  const handleStripePayment = async () => {
+    if (!user) {
+      toast.error('Please login to checkout');
+      navigate('/login');
+      return;
+    }
+
+    if (!formData.fullName || !formData.email || !formData.phone || !formData.addressLine1 || !formData.city || !formData.state) {
+      toast.error('Please fill all required fields');
+      return;
+    }
+
+    // Save address & notes for later retrieval after Stripe redirect
+    localStorage.setItem('checkout_address', JSON.stringify({
+      shippingAddress: {
+        fullName: formData.fullName,
+        email: formData.email,
+        phone: formData.phone,
+        addressLine1: formData.addressLine1,
+        city: formData.city,
+        state: formData.state,
+      },
+      notes: formData.notes,
+    }));
+
+    setStripeLoading(true);
+    try {
+      const items = cart.map(item => ({
+        name: item.name,
+        price: item.price,
+        quantity: item.quantity,
+      }));
+      const response = await createStripeCheckoutSession(items);
+      window.location.href = response.data.url;
+    } catch (err) {
+      console.error(err);
+      toast.error(err.response?.data?.message || 'Failed to initiate Stripe payment');
+      setStripeLoading(false);
     }
   };
 
@@ -118,7 +163,7 @@ export default function CheckoutPage() {
             </form>
           </div>
 
-          {/* Order Summary – unchanged */}
+          {/* Order Summary */}
           <div className="bg-white p-6 rounded-2xl shadow-sm h-fit sticky top-20">
             <h2 className="text-lg font-bold mb-4">Order Summary</h2>
             <div className="space-y-3 mb-4">
@@ -148,12 +193,30 @@ export default function CheckoutPage() {
               <label className="block text-xs font-bold uppercase mb-2">Payment Method</label>
               <select value={paymentMethod} onChange={(e) => setPaymentMethod(e.target.value)} className="w-full border rounded-lg p-2">
                 <option value="COD">Cash on Delivery</option>
+                <option value="Stripe">Stripe</option>
               </select>
             </div>
 
-            <button onClick={handleSubmit} disabled={loading} className="w-full mt-6 py-3 bg-[#4f378a] text-white font-bold rounded-full hover:bg-[#5f479a] transition disabled:opacity-50">
-              {loading ? 'Placing Order...' : 'Place Order (COD)'}
-            </button>
+            {/* Conditionally render only the selected payment button */}
+            {paymentMethod === 'COD' && (
+              <button
+                onClick={handleSubmit}
+                disabled={loading || stripeLoading}
+                className="w-full mt-6 py-3 bg-[#4f378a] text-white font-bold rounded-full hover:bg-[#5f479a] transition disabled:opacity-50"
+              >
+                {loading ? 'Placing Order...' : 'Place Order (COD)'}
+              </button>
+            )}
+
+            {paymentMethod === 'Stripe' && (
+              <button
+                onClick={handleStripePayment}
+                disabled={stripeLoading || loading}
+                className="w-full mt-6 py-3 bg-[#4f378a] text-white font-bold rounded-full hover:bg-[#5f479a] transition disabled:opacity-50"
+              >
+                {stripeLoading ? 'Redirecting to Stripe...' : 'Pay with Stripe'}
+              </button>
+            )}
           </div>
         </div>
       </div>
