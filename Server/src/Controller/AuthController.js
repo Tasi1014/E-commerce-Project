@@ -136,7 +136,7 @@ export const login = async (req, res) => {
 // @access  Public
 // Hardcoded admin credentials (change as needed)
 const ADMIN_EMAIL = 'admin@peak.com';
-const ADMIN_PASSWORD = 'admin123';
+const ADMIN_PASSWORD = 'admin';
 
 export const adminLogin = async (req, res) => {
   try {
