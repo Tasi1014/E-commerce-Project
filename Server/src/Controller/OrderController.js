@@ -2,7 +2,7 @@ import Order from '../models/Order.js';
 import Cart from '../models/Cart.js';
 import Product from '../models/Product.js';
 import User from '../models/User.js';
-import { createOrderFromCart } from '../services/orderService.js';
+import { createOrderFromCart } from '../services/OrderService.js';
 
 // Helper: decrement product stock
 const decrementStock = async (productId, quantity) => {

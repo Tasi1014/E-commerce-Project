@@ -1,5 +1,5 @@
 import Stripe from 'stripe';
-import { createOrderFromCart } from '../services/orderService.js';
+import { createOrderFromCart } from '../services/OrderService.js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
