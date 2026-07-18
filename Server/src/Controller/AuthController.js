@@ -1,7 +1,7 @@
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
-import { registerSchema, loginSchema } from '../request/authRequest.js';
+import { registerSchema, loginSchema } from '../request/AuthRequest.js';
 
 // Helper to generate JWT token
 const generateToken = (user) => {
