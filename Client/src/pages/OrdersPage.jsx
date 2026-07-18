@@ -24,7 +24,7 @@ export default function OrdersPage() {
   if (loading) return <div className="p-10 text-center">Loading orders...</div>;
 
   return (
-    <div className="bg-[#F5F0EB] min-h-screen py-10 px-4 md:px-16">
+    <div className="bg-[#F5F0EB] min-h-screen py-10 px-4 sm:px-8 md:px-16">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-extrabold mb-8">My Orders</h1>
         {orders.length === 0 ? (
@@ -35,7 +35,7 @@ export default function OrdersPage() {
         ) : (
           <div className="space-y-6">
             {orders.map((order) => (
-              <div key={order._id} className="bg-white rounded-2xl p-6 shadow-sm">
+              <div key={order._id} className="bg-white rounded-2xl p-4 sm:p-6 shadow-sm">
                 <div className="flex justify-between items-start flex-wrap gap-2 mb-4">
                   <div>
                     <p className="text-sm text-gray-500">Order #{order._id.slice(-8)}</p>
@@ -53,8 +53,8 @@ export default function OrdersPage() {
                 </div>
                 <div className="border-t pt-3">
                   {order.items.slice(0, 2).map((item, idx) => (
-                    <div key={idx} className="flex justify-between text-sm mb-1">
-                      <span>{item.quantity} × {item.name}</span>
+                    <div key={idx} className="flex justify-between text-sm mb-1 gap-2">
+                      <span className="truncate flex-1">{item.quantity} × {item.name}</span>
                       <span>${item.price.toFixed(2)}</span>
                     </div>
                   ))}

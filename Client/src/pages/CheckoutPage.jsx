@@ -124,9 +124,9 @@ export default function CheckoutPage() {
       <div className="max-w-6xl mx-auto">
         <h1 className="text-3xl font-extrabold mb-8">Checkout</h1>
 
-        <div className="grid md:grid-cols-3 gap-8">
+        <div className="grid md:grid-cols-3 gap-6 lg:gap-8">
           {/* Address Form */}
-          <div className="md:col-span-2">
+          <div className="md:col-span-2 order-2 md:order-1">
             <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-2xl shadow-sm">
               <div className="grid sm:grid-cols-2 gap-4">
                 <div>
@@ -164,7 +164,7 @@ export default function CheckoutPage() {
           </div>
 
           {/* Order Summary */}
-          <div className="bg-white p-6 rounded-2xl shadow-sm h-fit sticky top-20">
+          <div className="order-1 md:order-2 bg-white p-4 sm:p-6 rounded-2xl shadow-sm h-fit md:sticky md:top-20">
             <h2 className="text-lg font-bold mb-4">Order Summary</h2>
             <div className="space-y-3 mb-4">
               {cart.map((item) => (

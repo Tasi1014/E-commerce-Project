@@ -140,12 +140,12 @@ export default function ProductDetailPage() {
     <div className="bg-[#F5F0EB] min-h-screen py-10 md:py-16 px-4 sm:px-8 md:px-16 text-[#1d1b20]">
       <div className="max-w-[1440px] mx-auto">
         {/* BREADCRUMB */}
-        <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#49454f] mb-8">
+        <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-semibold text-[#49454f] mb-8">
           <Link to="/" className="hover:text-[#4f378a] transition-colors">Home</Link>
           <span>/</span>
           <Link to="/shop-all" className="hover:text-[#4f378a] transition-colors">Shop All</Link>
           <span>/</span>
-          <span className="text-[#1d1b20] font-bold">{product.category}</span>
+          <span className="text-[#1d1b20] font-bold truncate max-w-[150px] sm:max-w-none">{product.category}</span>
         </div>
 
         {/* MAIN PRODUCT SECTION */}
@@ -239,7 +239,7 @@ export default function ProductDetailPage() {
 
             <div className="flex flex-wrap gap-4 items-center mb-8">
               {/* Quantity selector */}
-              <div className="flex items-center border border-[#cbc4d2] rounded-full overflow-hidden bg-white">
+              <div className="flex items-center border border-[#cbc4d2] rounded-full overflow-hidden bg-white shrink-0">
                 <button
                   onClick={decreaseQuantity}
                   className="w-10 h-10 flex items-center justify-center text-[#1d1b20] hover:bg-[#f2ecf4] transition-colors"
@@ -247,7 +247,7 @@ export default function ProductDetailPage() {
                 >
                   <FiMinus className="w-4 h-4" />
                 </button>
-                <span className="w-12 text-center font-semibold text-[#1d1b20]">{quantity}</span>
+                <span className="w-10 text-center font-semibold text-[#1d1b20]">{quantity}</span>
                 <button
                   onClick={increaseQuantity}
                   className="w-10 h-10 flex items-center justify-center text-[#1d1b20] hover:bg-[#f2ecf4] transition-colors"
@@ -261,7 +261,7 @@ export default function ProductDetailPage() {
               <button
                 type="button"
                 onClick={handleAddToCart}
-                className="flex-1 py-4 bg-[#4f378a] text-white font-bold rounded-full cursor-pointer hover:bg-[#5f479a] transition-all hover:scale-[1.02] shadow-[0_8px_24px_rgba(79,55,138,0.25)] text-center text-sm sm:text-base border-none"
+                className="flex-1 min-w-[140px] py-4 bg-[#4f378a] text-white font-bold rounded-full cursor-pointer hover:bg-[#5f479a] transition-all hover:scale-[1.02] shadow-[0_8px_24px_rgba(79,55,138,0.25)] text-center text-sm sm:text-base border-none"
               >
                 Add to Cart
               </button>
@@ -326,7 +326,7 @@ export default function ProductDetailPage() {
               <h2 className="text-2xl sm:text-[30px] font-extrabold tracking-tight text-[#1d1b20]">You May Also Like</h2>
               <Link to="/shop-all" className="text-xs font-bold tracking-[0.1em] uppercase text-[#4f378a] hover:opacity-75 transition-opacity">VIEW ALL</Link>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
               {recommendations.map((rec) => (
                 <SingleProductItem
                   key={rec.id}

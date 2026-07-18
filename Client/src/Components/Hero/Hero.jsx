@@ -3,7 +3,6 @@ import { Autoplay, Pagination, EffectFade } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/effect-fade";
-import PrimaryButton from "../UI/Button/Button";
 import ButtonLink from "../UI/Link";
 
 export default function Hero() {
@@ -15,55 +14,55 @@ export default function Hero() {
   ];
 
   return (
-    <section className="bg-[#F5F0EB] min-h-screen flex items-center overflow-hidden">
-      <div className="max-w-[1440px] mx-auto px-16 py-20 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center w-full">
+    <section className="bg-[#F5F0EB] min-h-[auto] sm:min-h-screen flex items-center overflow-hidden">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-16 py-8 sm:py-16 lg:py-20 grid grid-cols-2 gap-3 xs:gap-6 sm:gap-12 lg:gap-20 items-center w-full">
+
         {/* Text Section */}
-        <div className="z-10">
-          <h1 className="text-[64px] lg:text-[72px] font-extrabold text-black leading-[1.05] mb-8 tracking-tight">
+        <div className="z-10 text-left">
+          <h1 className="text-[20px] xs:text-[28px] sm:text-[44px] md:text-[56px] lg:text-[72px] font-extrabold text-black leading-[1.05] mb-4 sm:mb-6 lg:mb-8 tracking-tight">
             Elevate Your <br />
             <span className="text-[#4f378a]">Everyday Style</span>
           </h1>
-          <p className="text-lg text-black leading-relaxed mb-10 max-w-[420px]">
+          <p className="text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg text-black leading-relaxed mb-4 sm:mb-8 lg:mb-10 max-w-[420px] mx-0">
             Experience curated minimalism with our new collection designed for
             the modern individual. Timeless pieces, modern silhouettes.
           </p>
-          <div className="flex flex-wrap gap-5">
-            <ButtonLink to="/shop-all" text="Show now"></ButtonLink>
-            
-            <ButtonLink to="/shop-all" text="Explore"></ButtonLink>
+          <div className="flex flex-wrap gap-2 sm:gap-4 lg:gap-5 justify-start">
+            <ButtonLink to="/shop-all" text="Shop now" />
+            <ButtonLink to="/shop-all" text="Explore" />
           </div>
 
-          <div className="mt-16 flex items-center gap-6">
-            <div className="flex -space-x-3">
+          {/* Social proof */}
+          <div className="mt-6 sm:mt-10 lg:mt-16 flex items-center gap-2 sm:gap-6 justify-start">
+            <div className="flex -space-x-2 sm:-space-x-3">
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="w-10 h-10 rounded-full border-2 border-[#111111] bg-neutral-800 overflow-hidden"
+                  className="w-6 h-6 xs:w-8 xs:h-8 sm:w-10 sm:h-10 rounded-full border-2 border-[#111111] bg-neutral-800 overflow-hidden"
                 >
                   <div className="w-full h-full bg-linear-to-tr opacity-80" />
                 </div>
               ))}
             </div>
-            <p className="text-sm text-black">
-              <span className="text-black font-medium">2.5k+</span> styles
-              already curated
+            <p className="text-[9px] xs:text-xs sm:text-sm text-black">
+              <span className="text-black font-medium">2.5k+</span> styles already curated
             </p>
           </div>
         </div>
 
-        {/* Swiper / Phone Mockup Section */}
+        {/* Phone Mockup – visible on all screens, size scales down on mobile */}
         <div className="relative flex justify-center items-center w-full min-w-0">
           {/* Decorative background glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] bg-[#4f378a]/20 blur-[120px] rounded-full -z-10 animate-pulse"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150px] xs:w-[220px] sm:w-[400px] lg:w-[500px] h-[150px] xs:h-[220px] sm:h-[400px] lg:h-[500px] bg-[#4f378a]/20 blur-[60px] sm:blur-[120px] rounded-full -z-10 animate-pulse" />
 
-          {/* Static Phone Mockup Frame */}
-          <div className="relative w-[300px] h-[600px] bg-[#111111] rounded-[50px] border-[10px] border-[#222222] shadow-[0_60px_120px_-30px_rgba(0,0,0,0.9),0_0_50px_-10px_rgba(79,55,138,0.2)] overflow-hidden lg:-translate-y-12 transition-transform duration-500">
-            {/* Phone Notch/Speaker */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-[#222222] rounded-b-2xl z-30 flex items-end justify-center pb-1">
-              <div className="w-10 h-1 bg-[#333333] rounded-full mb-1"></div>
+          {/* Phone Frame */}
+          <div className="relative w-[130px] h-[260px] xs:w-[160px] xs:h-[320px] sm:w-[220px] sm:h-[440px] md:w-[260px] md:h-[520px] lg:w-[300px] lg:h-[600px] bg-[#111111] rounded-[20px] xs:rounded-[26px] sm:rounded-[40px] lg:rounded-[50px] border-[4px] xs:border-[6px] sm:border-[8px] lg:border-[10px] border-[#222222] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8),0_0_25px_-5px_rgba(79,55,138,0.2)] overflow-hidden lg:-translate-y-12 transition-transform duration-500">
+            {/* Notch */}
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-14 xs:w-18 sm:w-24 lg:w-28 h-3 xs:h-4 sm:h-5 lg:h-6 bg-[#222222] rounded-b-lg xs:rounded-b-xl lg:rounded-b-2xl z-30 flex items-end justify-center pb-0.5 sm:pb-1">
+              <div className="w-5 xs:w-6 sm:w-8 h-0.5 sm:h-1 bg-[#333333] rounded-full mb-0.5 sm:mb-1" />
             </div>
 
-            {/* Inner Content (Swiper) */}
+            {/* Swiper */}
             <div className="w-full h-full relative z-10">
               <Swiper
                 modules={[Autoplay, Pagination, EffectFade]}
@@ -71,10 +70,7 @@ export default function Hero() {
                 slidesPerView={1}
                 loop={true}
                 autoplay={{ delay: 4000, disableOnInteraction: false }}
-                pagination={{
-                  clickable: true,
-                  dynamicBullets: true,
-                }}
+                pagination={{ clickable: true, dynamicBullets: true }}
                 effect="fade"
                 fadeEffect={{ crossFade: true }}
                 className="h-full w-full [&_.swiper-pagination-bullet]:bg-white/30 [&_.swiper-pagination-bullet-active]:bg-[#4f378a] [&_.swiper-pagination-bullet-active]:w-6 [&_.swiper-pagination-bullet-active]:rounded-sm [&_.swiper-pagination-bullet]:transition-all [&_.swiper-slide-active_.slide-image]:scale-110 [&_.swiper-slide-active_.slide-content]:translate-y-0 [&_.swiper-slide-active_.slide-content]:opacity-100"
@@ -87,15 +83,12 @@ export default function Hero() {
                         alt={`Fashion Model ${index + 1}`}
                         className="slide-image absolute inset-0 h-full w-full object-cover object-top transition-transform duration-[6000ms] ease-out"
                       />
-                      {/* Gradient overlay for text legibility */}
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60"></div>
-
-                      {/* Slide Content */}
-                      <div className="slide-content absolute bottom-12 left-6 right-6 z-20 transform translate-y-4 opacity-0 transition-all duration-700 delay-300">
-                        <span className="text-[10px] uppercase tracking-[0.2em] text-white/60 mb-1 block">
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
+                      <div className="slide-content absolute bottom-4 left-3 right-3 sm:bottom-10 sm:left-5 sm:right-5 z-20 transform translate-y-4 opacity-0 transition-all duration-700 delay-300">
+                        <span className="text-[6px] xs:text-[8px] sm:text-[10px] uppercase tracking-[0.2em] text-white/60 mb-0.5 sm:mb-1 block">
                           New Arrival
                         </span>
-                        <h3 className="text-lg font-bold text-white uppercase tracking-tight leading-tight">
+                        <h3 className="text-[8px] xs:text-[10px] sm:text-sm lg:text-base font-bold text-white uppercase tracking-tight leading-tight">
                           Summer 2026 <br /> Collection
                         </h3>
                       </div>
@@ -105,34 +98,21 @@ export default function Hero() {
               </Swiper>
             </div>
 
-            {/* Glass effect reflection overlay */}
-            <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-white/5 to-transparent z-20"></div>
+            {/* Reflection overlay */}
+            <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-white/5 to-transparent z-20" />
           </div>
-          {/* Floating badge */}
+
+          {/* Floating badge – only on tablet/desktop */}
           <div className="absolute bottom-8 -right-4 lg:-right-12 bg-[#222222]/85 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/10 shadow-2xl z-20 hidden sm:block">
             <div className="flex items-center gap-3">
               <div className="w-8 h-8 rounded-full bg-[#4f378a] flex items-center justify-center text-white shrink-0">
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="3"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="20 6 9 17 4 12"></polyline>
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+                  <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
-
               <div>
-                <p className="text-[10px] text-white/50 uppercase tracking-wider leading-none mb-1">
-                  Verified
-                </p>
-                <p className="text-xs font-bold text-white leading-none">
-                  Premium Quality
-                </p>
+                <p className="text-[10px] text-white/50 uppercase tracking-wider leading-none mb-1">Verified</p>
+                <p className="text-xs font-bold text-white leading-none">Premium Quality</p>
               </div>
             </div>
           </div>

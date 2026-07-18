@@ -137,11 +137,11 @@ export default function ShopAllPage() {
             <span className="text-xs font-bold tracking-[0.2em] text-[#4f378a]/70 uppercase block mb-1">
               NEW SEASON
             </span>
-            <h1 className="text-[36px] sm:text-[44px] md:text-[52px] font-extrabold tracking-tight leading-none">
+            <h1 className="text-[28px] sm:text-[36px] md:text-[44px] lg:text-[52px] font-extrabold tracking-tight leading-none">
               {searchTerm ? `Search: “${searchTerm}”` : "Shop All"}
             </h1>
           </div>
-          <p className="max-w-md text-sm sm:text-base text-[#49454f] leading-relaxed md:text-right">
+          <p className="max-w-md text-xs sm:text-sm md:text-base text-[#49454f] leading-relaxed md:text-right">
             Explore our curated collection of essentials...
           </p>
         </div>
@@ -202,7 +202,7 @@ export default function ShopAllPage() {
 
         {/* Product Grid */}
         {products.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 md:gap-8 mb-16">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 mb-16">
             {products.map((product) => (
               <SingleProductItem
                 key={product._id}
