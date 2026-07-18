@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticateToken, authorizeRoles } from '../middleware/authMiddleware.js';
+import { authenticateToken, authorizeRoles } from '../middleware/AuthMiddleware.js';
 import { getAllOrders, updateOrderStatus, getAdminStats } from '../Controller/OrderController.js';
 import { getAllUsers } from '../Controller/AuthController.js';
 import { getAllProductsAdmin, createProduct, updateProduct, deleteProduct } from '../Controller/ProductController.js';

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticateToken } from '../middleware/authMiddleware.js';
+import { authenticateToken } from '../middleware/AuthMiddleware.js';
 import { getWishlist, addToWishlist, removeFromWishlist } from '../Controller/WishlistController.js';
 
 const wishlistRouter = Router();
