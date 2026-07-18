@@ -237,7 +237,6 @@ export default function ProductDetailPage() {
               </div>
             )}
 
-            {/* ACTIONS ROW: Quantity selector + Add to Cart + Wishlist */}
             <div className="flex flex-wrap gap-4 items-center mb-8">
               {/* Quantity selector */}
               <div className="flex items-center border border-[#cbc4d2] rounded-full overflow-hidden bg-white">

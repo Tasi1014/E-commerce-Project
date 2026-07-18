@@ -2,7 +2,14 @@ import Order from '../models/Order.js';
 import Cart from '../models/Cart.js';
 import Product from '../models/Product.js';
 
-export const createOrderFromCart = async (userId, shippingAddress, paymentMethod, notes = '') => {
+export const createOrderFromCart = async (userId, shippingAddress, paymentMethod, notes = '', stripeSessionId = null) => {
+  // ── Idempotency guard ───────────────────────────────────────────────────────
+  // If a stripeSessionId is provided, check whether we already created an order
+  // for this Stripe session (handles React double-invoke / network retries).
+  if (stripeSessionId) {
+    const existing = await Order.findOne({ stripeSessionId });
+    if (existing) return existing;
+  }
   // Fetch cart
   const cart = await Cart.findOne({ user: userId });
   if (!cart || cart.items.length === 0) throw new Error('Cart is empty');
@@ -44,9 +51,10 @@ export const createOrderFromCart = async (userId, shippingAddress, paymentMethod
       shippingCost: 0,
       totalAmount: subtotal,
       notes,
+      // Store session id so repeated calls return this same order (idempotency)
+      ...(stripeSessionId ? { stripeSessionId } : {}),
     });
 
-    // ✅ Atomic clear cart – avoids version conflicts
     await Cart.updateOne({ user: userId }, { $set: { items: [] } });
 
     return order;

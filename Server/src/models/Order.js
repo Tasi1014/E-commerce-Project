@@ -52,6 +52,8 @@ const orderSchema = new mongoose.Schema(
     shippingCost: { type: Number, default: 0 },
     totalAmount: { type: Number, required: true },
     notes: { type: String, default: '' },
+    // Stripe idempotency key – prevents duplicate orders on repeated webhook/page calls
+    stripeSessionId: { type: String, default: null, sparse: true },
   },
   { timestamps: true }
 );

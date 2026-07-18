@@ -51,7 +51,10 @@ export const verifyAndCreateOrder = async (req, res) => {
     }
 
     const userId = session.metadata.userId;
-    const order = await createOrderFromCart(userId, shippingAddress, 'Stripe', notes);
+
+    // Pass session_id as the idempotency key – if an order for this session
+    // already exists it will be returned instead of creating a duplicate.
+    const order = await createOrderFromCart(userId, shippingAddress, 'Stripe', notes, session_id);
     res.json({ success: true, orderId: order._id });
   } catch (err) {
     console.error(err);

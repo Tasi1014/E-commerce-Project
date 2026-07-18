@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { verifyStripePaymentAndCreateOrder } from '../api/paymentApi';
@@ -10,7 +10,14 @@ export default function OrderSuccessPage() {
   const { clearCart, loadCart } = useCart();   // get clearCart and loadCart
   const [processing, setProcessing] = useState(true);
 
+  // Guard so this effect runs exactly ONCE even if React StrictMode double-invokes it
+  // or context functions (clearCart/loadCart) change reference between renders.
+  const hasRun = useRef(false);
+
   useEffect(() => {
+    if (hasRun.current) return;   // already executed – bail out
+    hasRun.current = true;
+
     const sessionId = searchParams.get('session_id');
     if (!sessionId) {
       toast.error('Invalid payment session');
@@ -36,10 +43,7 @@ export default function OrderSuccessPage() {
         clearCart();
         await loadCart();
 
-        // Short delay before redirect so UI updates
-        setTimeout(() => {
-          navigate(`/order-confirmation/${orderId}`);
-        }, 500);
+        navigate(`/order-confirmation/${orderId}`, { replace: true });
       } catch (err) {
         console.error(err);
         toast.error(err.response?.data?.message || 'Order finalization failed');
@@ -49,7 +53,8 @@ export default function OrderSuccessPage() {
       }
     };
     completeOrder();
-  }, [searchParams, navigate, clearCart, loadCart]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // intentionally empty – we only want this to run once on mount
 
   if (processing) {
     return (
