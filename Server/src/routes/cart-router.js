@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { authenticateToken } from '../middleware/authMiddleware.js';
+import { authenticateToken } from '../middleware/AuthMiddleware.js';
 import { getCart, addToCart, updateCartItem, removeCartItem } from '../Controller/CartController.js';
 
 const cartRouter = Router();
