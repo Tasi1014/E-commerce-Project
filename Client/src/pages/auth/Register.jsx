@@ -22,12 +22,12 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router-dom";
 
 // Validation schema (Zod)
-import { registerSchema } from "../../validation/auth/registerSchema";
+import { registerSchema } from "../../Validation/auth/registerSchema";
 
 // Reusable form components
-import FormContainer from "../../components/form/FormContainer";
-import FormInput from "../../components/form/FormInput";
-import FormButton from "../../components/form/FormButton";
+import FormContainer from "../../Components/form/FormContainer";
+import FormInput from "../../Components/form/FormInput";
+import FormButton from "../../Components/form/FormButton";
 
 // API function (axios)
 import { registerUser } from "../../api/authApi";

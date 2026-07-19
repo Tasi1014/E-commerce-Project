@@ -5,9 +5,9 @@ import { toast } from "sonner";
 // validation
 import { contactSchema } from "../Validation/Contact-Us/ContactSchema";
 // reusable components
-import FormContainer from "../components/form/FormContainer";
-import FormInput from "../components/form/FormInput";
-import FormButton from "../components/form/FormButton";
+import FormContainer from "../Components/form/FormContainer";
+import FormInput from "../Components/form/FormInput";
+import FormButton from "../Components/form/FormButton";
 
 export default function ContactUsPage() {
 
