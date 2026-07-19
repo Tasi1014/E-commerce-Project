@@ -1,16 +1,4 @@
 import React from 'react';
-
-/**
- * DataTable Component
- * ─────────────────────────────────────────────
- * A reusable, premium responsive table component matching the PEAK dark theme.
- * 
- * Props:
- *  - columns: Array of { key: string, label: string, render?: (val, row) => ReactNode }
- *  - data: Array of objects to render
- *  - loading: Boolean to show skeleton loader
- *  - emptyMessage: Custom message to display when no data is available
- */
 export default function DataTable({ columns, data, loading, emptyMessage = "No data available." }) {
   return (
     <div className="w-full bg-[#1a1a24] border border-white/[0.06] rounded-2xl overflow-hidden shadow-[0_8px_32px_rgba(0,0,0,0.3)]">
