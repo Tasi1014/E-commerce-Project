@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Link, useNavigate } from "react-router-dom";
 
 // Validation schema (Zod)
-import { loginSchema } from "../../Validation/auth/loginSchema";
+import { loginSchema } from "../../Validation/auth/LoginSchema";
 
 // Reusable form components
 import FormContainer from "../../Components/form/FormContainer";

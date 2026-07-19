@@ -1,7 +1,7 @@
 import { createContext, useContext, useState, useEffect, useMemo } from "react";
 import { toast } from "sonner";
 import { useAuth } from "./AuthContext";
-import { fetchCart, addToCartApi, updateCartItemApi, removeCartItemApi } from "../api/CartApi.js";
+import { fetchCart, addToCartApi, updateCartItemApi, removeCartItemApi } from "../api/cartApi";
 
 const CartContext = createContext(null);
 
