@@ -5,7 +5,7 @@ import router from "./routes/router.js"
 const app = express();
 
 // Middleware
-app.use(cors());
+app.use(cors({ origin: process.env.FRONTEND_URL }));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 

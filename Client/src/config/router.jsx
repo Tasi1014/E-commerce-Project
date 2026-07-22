@@ -4,6 +4,8 @@ import { WishlistProvider } from "../context/WishlistContext";
 import { AuthProvider } from "../context/AuthContext";
 import { CartProvider } from "../context/CartContext";
 
+import { ProfileProvider } from "../context/ProfileContext";
+
 // Inner component to read modal state from CartContext
 const router = createBrowserRouter(routes);
 
@@ -12,7 +14,9 @@ export default function RouterConfig() {
     <AuthProvider>
       <CartProvider>
         <WishlistProvider>
-          <RouterProvider router={router} />
+          <ProfileProvider>
+            <RouterProvider router={router} />
+          </ProfileProvider>
         </WishlistProvider>
       </CartProvider>
     </AuthProvider>

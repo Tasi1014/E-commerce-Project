@@ -1,26 +1,29 @@
 import { useState, useEffect, useRef } from "react";
 import { Link, NavLink, useNavigate } from "react-router-dom";
-import { FiSearch, FiHeart, FiLogOut, FiUser, FiChevronDown, FiPackage, FiMenu, FiX } from "react-icons/fi";
+import { FiSearch, FiHeart, FiLogOut, FiUser, FiChevronDown, FiPackage, FiX } from "react-icons/fi";
 import { BsCart3 } from "react-icons/bs";
 import { useWishlist } from "../../context/WishlistContext";
 import { useCart } from "../../context/CartContext";
 import { useAuth } from "../../context/AuthContext";
+import { useProfile } from "../../context/ProfileContext";
 import { toast } from "sonner";
 
 export default function HomeHeader() {
   const [showSearch, setShowSearch] = useState(false);
   const [showUserMenu, setShowUserMenu] = useState(false);
-  const [mobileOpen, setMobileOpen] = useState(false);
-  const [mobileSearch, setMobileSearch] = useState("");
+  const [showMobileSearch, setShowMobileSearch] = useState(false);
+  const [mobileSearchQuery, setMobileSearchQuery] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
 
   const { wishlist, setIsOpen: openWishlist } = useWishlist();
   const { cart, setIsOpen: openCart } = useCart();
   const { user, logout } = useAuth();
+  const { openProfile } = useProfile();
   const navigate = useNavigate();
 
   const userMenuRef = useRef(null);
   const searchInputRef = useRef(null);
+  const mobileSearchRef = useRef(null);
 
   const cartCount = cart.length;
 
@@ -42,19 +45,15 @@ export default function HomeHeader() {
     }
   }, [showSearch]);
 
-  // Lock body scroll when mobile drawer is open
+  // Focus mobile search input when mobile search bar opens
   useEffect(() => {
-    if (mobileOpen) {
-      document.body.style.overflow = "hidden";
-    } else {
-      document.body.style.overflow = "";
+    if (showMobileSearch && mobileSearchRef.current) {
+      mobileSearchRef.current.focus();
     }
-    return () => { document.body.style.overflow = ""; };
-  }, [mobileOpen]);
+  }, [showMobileSearch]);
 
   const handleLogout = async () => {
     setShowUserMenu(false);
-    setMobileOpen(false);
     await logout();
     toast.success("You've been logged out successfully.");
     navigate("/");
@@ -84,10 +83,10 @@ export default function HomeHeader() {
 
   const handleMobileSearchSubmit = (e) => {
     e.preventDefault();
-    const trimmed = mobileSearch.trim();
+    const trimmed = mobileSearchQuery.trim();
     navigate(trimmed ? `/shop-all?search=${encodeURIComponent(trimmed)}` : "/shop-all");
-    setMobileSearch("");
-    setMobileOpen(false);
+    setShowMobileSearch(false);
+    setMobileSearchQuery("");
   };
 
   const toggleSearch = () => {
@@ -95,26 +94,21 @@ export default function HomeHeader() {
     setShowSearch((prev) => !prev);
   };
 
-  const closeMobileAndNavigate = (path) => {
-    setMobileOpen(false);
-    navigate(path);
-  };
-
   return (
     <>
-      <nav className="sticky top-0 z-50 bg-white border-b border-[#e6e0e9]">
-        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center h-16 gap-4 lg:gap-10 relative">
+      <nav className="sticky top-0 z-40 bg-white border-b border-[#e6e0e9]">
+        <div className="max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16 relative">
 
           {/* Logo */}
           <Link
             to="/"
-            className="text-[22px] font-extrabold tracking-wide text-[#1d1b20] shrink-0 hover:scale-110 transition-all duration-300"
+            className="text-xl sm:text-[22px] font-extrabold tracking-wide text-[#1d1b20] shrink-0 hover:scale-105 transition-all duration-300"
           >
             PEAK
           </Link>
 
-          {/* ── Desktop Nav (lg+) ───────────────────────────────── */}
-          <div className="hidden lg:flex flex-1 justify-center gap-8">
+          {/* ── Desktop/Tablet Nav (md+) ───────────────────────── */}
+          <div className="hidden md:flex flex-1 justify-center gap-8">
             {navLinks.map((link) => (
               <NavLink
                 to={link.path}
@@ -133,8 +127,8 @@ export default function HomeHeader() {
             ))}
           </div>
 
-          {/* ── Desktop Actions (lg+) ───────────────────────────── */}
-          <div className="hidden lg:flex items-center gap-2 relative">
+          {/* ── Desktop/Tablet Actions (md+) ───────────────────── */}
+          <div className="hidden md:flex items-center gap-2 relative">
             {/* Search toggle */}
             <button
               onClick={toggleSearch}
@@ -249,160 +243,66 @@ export default function HomeHeader() {
             </div>
           </div>
 
-          {/* ── Mobile / Tablet right-side icons (< lg) ─────────── */}
-          <div className="flex lg:hidden items-center gap-1 ml-auto">
-            {/* Wishlist */}
+          {/* ── Mobile-Only Top Navbar (≤768px) ─────────────────────────── */}
+          <div className="flex md:hidden items-center gap-3">
+            {/* Search Icon */}
             <button
-              onClick={() => openWishlist(true)}
-              className="p-2 bg-transparent border-none cursor-pointer relative"
-              aria-label="Open Wishlist"
-            >
-              <FiHeart size={20} color="#1d1b20" />
-              {wishlist.length > 0 && (
-                <span className="absolute top-0.5 right-0.5 w-[16px] h-[16px] bg-[#4f378a] text-white text-[8px] font-bold rounded-full flex items-center justify-center border-2 border-white leading-none">
-                  {wishlist.length > 9 ? "9+" : wishlist.length}
-                </span>
-              )}
-            </button>
-
-            {/* Cart */}
-            <button
-              onClick={() => openCart(true)}
-              className="p-2 bg-transparent border-none cursor-pointer relative"
-              aria-label="Open Cart"
-            >
-              <BsCart3 size={20} color="#1d1b20" />
-              {cartCount > 0 && (
-                <span className="absolute top-0.5 right-0.5 w-[16px] h-[16px] bg-[#4f378a] text-white text-[8px] font-bold rounded-full flex items-center justify-center border-2 border-white leading-none">
-                  {cartCount > 9 ? "9+" : cartCount}
-                </span>
-              )}
-            </button>
-
-            {/* Hamburger */}
-            <button
-              onClick={() => setMobileOpen(true)}
-              className="p-2 bg-transparent border-none cursor-pointer"
-              aria-label="Open menu"
-            >
-              <FiMenu size={22} color="#1d1b20" />
-            </button>
-          </div>
-        </div>
-      </nav>
-
-      {/* ── Mobile Drawer Backdrop ─────────────────────────────── */}
-      <div
-        onClick={() => setMobileOpen(false)}
-        className={`fixed inset-0 bg-black/40 backdrop-blur-sm z-[60] transition-opacity duration-300 lg:hidden ${
-          mobileOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-        }`}
-      />
-
-      {/* ── Mobile Drawer Panel ────────────────────────────────── */}
-      <div
-        className={`fixed left-0 top-0 h-full w-[280px] sm:w-[320px] bg-white z-[70] shadow-2xl flex flex-col transition-transform duration-300 ease-out lg:hidden ${
-          mobileOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
-      >
-        {/* Drawer header */}
-        <div className="flex items-center justify-between px-5 py-4 border-b border-[#e6e0e9]">
-          <span className="text-[20px] font-extrabold tracking-wide text-[#1d1b20]">PEAK</span>
-          <button
-            onClick={() => setMobileOpen(false)}
-            className="p-1.5 rounded-full bg-[#f2ecf4] border-none cursor-pointer flex items-center justify-center"
-            aria-label="Close menu"
-          >
-            <FiX size={18} color="#1d1b20" />
-          </button>
-        </div>
-
-        {/* Mobile search */}
-        <div className="px-5 py-4 border-b border-[#e6e0e9]">
-          <form onSubmit={handleMobileSearchSubmit} className="flex gap-2">
-            <input
-              type="text"
-              value={mobileSearch}
-              onChange={(e) => setMobileSearch(e.target.value)}
-              placeholder="Search products..."
-              className="flex-1 px-4 py-2.5 rounded-xl border border-[#e6e0e9] outline-none text-sm text-[#1d1b20] bg-[#f9f7f5] focus:border-[#4f378a] transition-all"
-            />
-            <button
-              type="submit"
-              className="px-3 py-2 bg-[#4f378a] text-white rounded-xl border-none cursor-pointer flex items-center justify-center"
+              onClick={() => setShowMobileSearch((prev) => !prev)}
+              className="p-2 bg-transparent border-none cursor-pointer flex items-center justify-center text-[#1d1b20] hover:scale-105 transition-transform"
               aria-label="Search"
             >
-              <FiSearch size={16} />
+              <FiSearch size={22} />
             </button>
-          </form>
+
+            {/* If logged in: User Initials Badge ("TS", "NM"); If logged out: Login Button */}
+            {user ? (
+              <button
+                onClick={openProfile}
+                className="w-9 h-9 rounded-full bg-[#4f378a] text-white text-xs font-extrabold flex items-center justify-center shrink-0 shadow-md border-none cursor-pointer hover:scale-105 transition-transform"
+                aria-label="User profile"
+              >
+                {getUserInitials(user.name)}
+              </button>
+            ) : (
+              <Link
+                to="/login"
+                className="px-4 py-1.5 bg-[#4f378a] text-white text-xs font-extrabold rounded-xl hover:bg-[#5f479a] transition-all no-underline shadow-xs"
+              >
+                Login
+              </Link>
+            )}
+          </div>
         </div>
 
-        {/* Nav links */}
-        <nav className="flex-1 overflow-y-auto px-3 py-4">
-          <p className="text-[10px] font-bold tracking-[0.15em] uppercase text-[#49454f] px-2 mb-3">
-            Navigation
-          </p>
-          {navLinks.map((link) => (
-            <NavLink
-              to={link.path}
-              key={link.label}
-              end={link.path === "/"}
-              onClick={() => setMobileOpen(false)}
-              className={({ isActive }) =>
-                `flex items-center px-3 py-3 mb-1 rounded-xl text-sm font-semibold tracking-wide transition-all ${
-                  isActive
-                    ? "bg-[#f2ecf4] text-[#4f378a]"
-                    : "text-[#1d1b20] hover:bg-[#f9f7f5]"
-                }`
-              }
-            >
-              {link.label}
-            </NavLink>
-          ))}
-        </nav>
-
-        {/* User section at bottom */}
-        <div className="border-t border-[#e6e0e9] p-4">
-          {user ? (
-            <div>
-              {/* User info */}
-              <div className="flex items-center gap-3 mb-3 px-1">
-                <span className="w-9 h-9 rounded-full bg-[#4f378a] text-white text-xs font-extrabold flex items-center justify-center shrink-0 shadow-[0_2px_8px_rgba(79,55,138,0.3)]">
-                  {getUserInitials(user.name)}
-                </span>
-                <div className="min-w-0">
-                  <p className="text-sm font-extrabold text-[#1d1b20] truncate">{user.name}</p>
-                  <p className="text-xs text-[#49454f] truncate">{user.email}</p>
-                </div>
-              </div>
-              {/* My Orders */}
+        {/* Mobile Search Overlay Bar */}
+        {showMobileSearch && (
+          <div className="md:hidden border-t border-[#e6e0e9] bg-[#fafafa] px-4 py-3 shadow-inner">
+            <form onSubmit={handleMobileSearchSubmit} className="flex gap-2 items-center">
+              <input
+                ref={mobileSearchRef}
+                type="text"
+                value={mobileSearchQuery}
+                onChange={(e) => setMobileSearchQuery(e.target.value)}
+                placeholder="Search products..."
+                className="flex-1 px-4 py-2 rounded-xl border border-gray-200 text-sm text-[#1d1b20] bg-white outline-none focus:border-[#4f378a]"
+              />
               <button
-                onClick={() => closeMobileAndNavigate("/orders")}
-                className="w-full flex items-center gap-3 px-3 py-2.5 mb-1 rounded-xl text-sm font-semibold text-[#1d1b20] hover:bg-[#f2ecf4] transition-colors border-none bg-transparent cursor-pointer text-left"
+                type="submit"
+                className="px-4 py-2 bg-[#4f378a] text-white text-xs font-bold rounded-xl border-none cursor-pointer"
               >
-                <FiPackage className="w-4 h-4 shrink-0" />
-                My Orders
+                Search
               </button>
-              {/* Logout */}
               <button
-                onClick={handleLogout}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-[#ba1a1a] hover:bg-[#ba1a1a]/5 transition-colors cursor-pointer border-none bg-transparent text-left"
+                type="button"
+                onClick={() => setShowMobileSearch(false)}
+                className="p-2 text-gray-500 bg-transparent border-none cursor-pointer"
               >
-                <FiLogOut className="w-4 h-4 shrink-0" />
-                Logout
+                <FiX size={18} />
               </button>
-            </div>
-          ) : (
-            <Link
-              to="/login"
-              onClick={() => setMobileOpen(false)}
-              className="block w-full py-3 bg-[#4f378a] text-white text-sm font-bold rounded-xl text-center hover:bg-[#5f479a] transition-all no-underline shadow-[0_4px_12px_rgba(79,55,138,0.25)]"
-            >
-              Login / Register
-            </Link>
-          )}
-        </div>
-      </div>
+            </form>
+          </div>
+        )}
+      </nav>
     </>
   );
 }

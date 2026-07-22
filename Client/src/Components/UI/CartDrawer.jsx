@@ -52,7 +52,7 @@ export default function CartDrawer() {
       <div
         onClick={() => setIsOpen(false)}
         className={`
-          fixed inset-0 bg-black/40 backdrop-blur-sm z-50 transition-opacity duration-300
+          fixed inset-0 bg-black/40 backdrop-blur-sm z-[65] transition-opacity duration-300
           ${isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
         `}
       />
@@ -61,7 +61,7 @@ export default function CartDrawer() {
       <div
         ref={drawerRef}
         className={`
-          fixed right-0 top-0 h-full w-full max-w-[400px] bg-[#F5F0EB] z-50 shadow-2xl
+          fixed right-0 top-0 h-full w-full max-w-[400px] bg-[#F5F0EB] z-[70] shadow-2xl
           flex flex-col transition-transform duration-300 ease-out transform
           ${isOpen ? "translate-x-0" : "translate-x-full"}
         `}
@@ -89,7 +89,7 @@ export default function CartDrawer() {
         </div>
 
         {/* Drawer Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
+        <div className="flex-1 overflow-y-auto px-6 py-4 pb-[80px] md:pb-4">
           {cart.length > 0 ? (
             <div className="space-y-4">
               {cart.map((item, idx) => (
@@ -197,7 +197,7 @@ export default function CartDrawer() {
 
         {/* Footer Subtotal & Checkout Actions */}
         {cart.length > 0 && (
-          <div className="bg-white border-t border-[#e6e0e9] p-6 space-y-4">
+          <div className="bg-white border-t border-[#e6e0e9] p-5 sm:p-6 space-y-3.5 mb-[60px] md:mb-0 shrink-0">
             <div className="flex justify-between items-center text-[#1d1b20]">
               <span className="text-sm font-bold uppercase tracking-wider text-[#49454f]">
                 Subtotal

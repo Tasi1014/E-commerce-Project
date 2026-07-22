@@ -14,16 +14,16 @@ export default function Hero() {
   ];
 
   return (
-    <section className="bg-[#F5F0EB] min-h-[auto] sm:min-h-screen flex items-center overflow-hidden">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-16 py-8 sm:py-16 lg:py-20 grid grid-cols-2 gap-3 xs:gap-6 sm:gap-12 lg:gap-20 items-center w-full">
+    <section className="bg-[#F5F0EB] py-6 sm:py-10 lg:py-12 flex items-center overflow-hidden">
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-16 grid grid-cols-2 gap-3 xs:gap-6 sm:gap-10 lg:gap-16 items-center w-full">
 
         {/* Text Section */}
         <div className="z-10 text-left">
-          <h1 className="text-[20px] xs:text-[28px] sm:text-[44px] md:text-[56px] lg:text-[72px] font-extrabold text-black leading-[1.05] mb-4 sm:mb-6 lg:mb-8 tracking-tight">
+          <h1 className="text-[20px] xs:text-[28px] sm:text-[40px] md:text-[48px] lg:text-[56px] xl:text-[64px] font-extrabold text-black leading-[1.08] mb-3 sm:mb-6 lg:mb-6 tracking-tight">
             Elevate Your <br />
             <span className="text-[#4f378a]">Everyday Style</span>
           </h1>
-          <p className="text-[10px] xs:text-xs sm:text-sm md:text-base lg:text-lg text-black leading-relaxed mb-4 sm:mb-8 lg:mb-10 max-w-[420px] mx-0">
+          <p className="text-[10px] xs:text-xs sm:text-sm md:text-base text-black leading-relaxed mb-4 sm:mb-6 lg:mb-8 max-w-[420px] mx-0">
             Experience curated minimalism with our new collection designed for
             the modern individual. Timeless pieces, modern silhouettes.
           </p>
@@ -33,12 +33,12 @@ export default function Hero() {
           </div>
 
           {/* Social proof */}
-          <div className="mt-6 sm:mt-10 lg:mt-16 flex items-center gap-2 sm:gap-6 justify-start">
+          <div className="mt-5 sm:mt-8 lg:mt-10 flex items-center gap-2 sm:gap-4 lg:gap-6 justify-start">
             <div className="flex -space-x-2 sm:-space-x-3">
               {[1, 2, 3].map((i) => (
                 <div
                   key={i}
-                  className="w-6 h-6 xs:w-8 xs:h-8 sm:w-10 sm:h-10 rounded-full border-2 border-[#111111] bg-neutral-800 overflow-hidden"
+                  className="w-6 h-6 xs:w-8 xs:h-8 sm:w-9 sm:h-9 rounded-full border-2 border-[#111111] bg-neutral-800 overflow-hidden"
                 >
                   <div className="w-full h-full bg-linear-to-tr opacity-80" />
                 </div>
@@ -50,16 +50,16 @@ export default function Hero() {
           </div>
         </div>
 
-        {/* Phone Mockup – visible on all screens, size scales down on mobile */}
+        {/* Phone Mockup – perfectly scaled for both mobile and desktop viewports */}
         <div className="relative flex justify-center items-center w-full min-w-0">
           {/* Decorative background glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[150px] xs:w-[220px] sm:w-[400px] lg:w-[500px] h-[150px] xs:h-[220px] sm:h-[400px] lg:h-[500px] bg-[#4f378a]/20 blur-[60px] sm:blur-[120px] rounded-full -z-10 animate-pulse" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[160px] xs:w-[240px] sm:w-[350px] lg:w-[450px] h-[160px] xs:h-[240px] sm:h-[350px] lg:h-[450px] bg-[#4f378a]/20 blur-[50px] sm:blur-[100px] rounded-full -z-10 animate-pulse" />
 
           {/* Phone Frame */}
-          <div className="relative w-[130px] h-[260px] xs:w-[160px] xs:h-[320px] sm:w-[220px] sm:h-[440px] md:w-[260px] md:h-[520px] lg:w-[300px] lg:h-[600px] bg-[#111111] rounded-[20px] xs:rounded-[26px] sm:rounded-[40px] lg:rounded-[50px] border-[4px] xs:border-[6px] sm:border-[8px] lg:border-[10px] border-[#222222] shadow-[0_30px_60px_-15px_rgba(0,0,0,0.8),0_0_25px_-5px_rgba(79,55,138,0.2)] overflow-hidden lg:-translate-y-12 transition-transform duration-500">
+          <div className="relative w-[150px] h-[300px] xs:w-[180px] xs:h-[360px] sm:w-[220px] sm:h-[440px] md:w-[250px] md:h-[500px] lg:w-[270px] lg:h-[540px] bg-[#111111] rounded-[24px] xs:rounded-[30px] sm:rounded-[40px] lg:rounded-[48px] border-[5px] xs:border-[6px] sm:border-[8px] lg:border-[10px] border-[#222222] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.8),0_0_20px_-5px_rgba(79,55,138,0.2)] overflow-hidden transition-all duration-300">
             {/* Notch */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-14 xs:w-18 sm:w-24 lg:w-28 h-3 xs:h-4 sm:h-5 lg:h-6 bg-[#222222] rounded-b-lg xs:rounded-b-xl lg:rounded-b-2xl z-30 flex items-end justify-center pb-0.5 sm:pb-1">
-              <div className="w-5 xs:w-6 sm:w-8 h-0.5 sm:h-1 bg-[#333333] rounded-full mb-0.5 sm:mb-1" />
+            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 xs:w-20 sm:w-24 lg:w-28 h-3.5 xs:h-4 sm:h-5 lg:h-6 bg-[#222222] rounded-b-lg xs:rounded-b-xl lg:rounded-b-2xl z-30 flex items-end justify-center pb-0.5 sm:pb-1">
+              <div className="w-6 xs:w-7 sm:w-8 h-0.5 sm:h-1 bg-[#333333] rounded-full mb-0.5 sm:mb-1" />
             </div>
 
             {/* Swiper */}
@@ -84,11 +84,11 @@ export default function Hero() {
                         className="slide-image absolute inset-0 h-full w-full object-cover object-top transition-transform duration-[6000ms] ease-out"
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
-                      <div className="slide-content absolute bottom-4 left-3 right-3 sm:bottom-10 sm:left-5 sm:right-5 z-20 transform translate-y-4 opacity-0 transition-all duration-700 delay-300">
-                        <span className="text-[6px] xs:text-[8px] sm:text-[10px] uppercase tracking-[0.2em] text-white/60 mb-0.5 sm:mb-1 block">
+                      <div className="slide-content absolute bottom-4 left-3 right-3 sm:bottom-8 sm:left-5 sm:right-5 z-20 transform translate-y-4 opacity-0 transition-all duration-700 delay-300">
+                        <span className="text-[7px] xs:text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-white/60 mb-0.5 sm:mb-1 block">
                           New Arrival
                         </span>
-                        <h3 className="text-[8px] xs:text-[10px] sm:text-sm lg:text-base font-bold text-white uppercase tracking-tight leading-tight">
+                        <h3 className="text-[9px] xs:text-[11px] sm:text-sm lg:text-base font-bold text-white uppercase tracking-tight leading-tight">
                           Summer 2026 <br /> Collection
                         </h3>
                       </div>
@@ -103,15 +103,15 @@ export default function Hero() {
           </div>
 
           {/* Floating badge – only on tablet/desktop */}
-          <div className="absolute bottom-8 -right-4 lg:-right-12 bg-[#222222]/85 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/10 shadow-2xl z-20 hidden sm:block">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#4f378a] flex items-center justify-center text-white shrink-0">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
+          <div className="absolute bottom-6 -right-2 lg:-right-6 bg-[#222222]/85 backdrop-blur-md px-3 py-2.5 rounded-2xl border border-white/10 shadow-2xl z-20 hidden sm:block">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-full bg-[#4f378a] flex items-center justify-center text-white shrink-0">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
                   <polyline points="20 6 9 17 4 12" />
                 </svg>
               </div>
               <div>
-                <p className="text-[10px] text-white/50 uppercase tracking-wider leading-none mb-1">Verified</p>
+                <p className="text-[9px] text-white/50 uppercase tracking-wider leading-none mb-1">Verified</p>
                 <p className="text-xs font-bold text-white leading-none">Premium Quality</p>
               </div>
             </div>

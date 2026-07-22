@@ -50,7 +50,6 @@ export default function ContactUsPage() {
       reset(); // clear form fields after success
 
     } catch (err) {
-      // ❌ Server error toast
       toast.error(err.message || "Something went wrong. Please try again.");
     }
   };

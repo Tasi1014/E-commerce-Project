@@ -50,7 +50,7 @@ export default function WishlistDrawer() {
       <div
         onClick={() => setIsOpen(false)}
         className={`
-          fixed inset-0 bg-black/40 backdrop-blur-sm z-50 transition-opacity duration-300
+          fixed inset-0 bg-black/40 backdrop-blur-sm z-[65] transition-opacity duration-300
           ${isOpen ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
         `}
       />
@@ -59,7 +59,7 @@ export default function WishlistDrawer() {
       <div
         ref={drawerRef}
         className={`
-          fixed right-0 top-0 h-full w-full max-w-[400px] bg-[#F5F0EB] z-50 shadow-2xl
+          fixed right-0 top-0 h-full w-full max-w-[400px] bg-[#F5F0EB] z-[70] shadow-2xl
           flex flex-col transition-transform duration-300 ease-out transform
           ${isOpen ? "translate-x-0" : "translate-x-full"}
         `}
@@ -87,7 +87,7 @@ export default function WishlistDrawer() {
         </div>
 
         {/* Drawer Content */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
+        <div className="flex-1 overflow-y-auto px-6 py-4 pb-[80px] md:pb-4">
           {wishlist.length > 0 ? (
             <div className="space-y-4">
               {wishlist.map((item) => (
