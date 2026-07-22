@@ -10,7 +10,6 @@ export default function WishlistDrawer() {
   const navigate = useNavigate();
   const drawerRef = useRef(null);
 
-  // Close drawer on ESC key press
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === "Escape") {

@@ -10,7 +10,6 @@ function HomePage() {
     <>
     <Hero/>
     <ProductSection/>
-    <StorySection/>
     <FeaturesSection/>
     </>
   )
