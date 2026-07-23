@@ -3,6 +3,7 @@ import { FiSearch, FiRefreshCw } from "react-icons/fi";
 import { toast } from "sonner";
 import axiosInstance from "../../api/axiosInstance";
 import DataTable from "../../Components/UI/DataTable";
+import { fetchUserOrders } from '../../api/orderApi';
 
 const STATUS_STYLES = {
   Pending:    "text-[#facc15] bg-[#facc15]/10 border-[#facc15]/20",
@@ -39,6 +40,20 @@ export default function AdminOrders() {
     }, 300);
     return () => clearTimeout(handler);
   }, [search]);
+
+  useEffect(() => {
+      const fetchOrders = async () => {
+        try {
+          const res = await fetchUserOrders();
+          setOrders(res.data.orders);
+        } catch (err) {
+          toast.error('Failed to load orders');
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchOrders();
+    }, []);
 
   const fetchOrders = async (showToast = false) => {
     try {
@@ -161,6 +176,25 @@ export default function AdminOrders() {
         </select>
       ),
     },
+    {
+      key: "address",
+      label: "Address",
+      render: (val, row) => (
+        <div className="flex flex-col gap-1">
+          <span className="text-xs text-[#9ca3af]">{val || "—"}</span>
+          {row.location?.lat && row.location?.lng && (
+            <a
+              href={`https://www.openstreetmap.org/?mlat=${row.location.lat}&mlon=${row.location.lng}#map=17/${row.location.lat}/${row.location.lng}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#4f378a] text-sm underline"
+            >
+              View on map
+            </a>
+          )}
+        </div>
+      ),
+    }
   ];
 
   return (
