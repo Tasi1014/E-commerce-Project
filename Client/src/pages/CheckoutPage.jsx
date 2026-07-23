@@ -8,6 +8,8 @@ import { useAuth } from '../context/AuthContext';
 import { createOrder } from '../api/orderApi';
 import { createStripeCheckoutSession } from '../api/paymentApi';
 
+import LocationPicker from '../Components/Checkout/LocationPicker';
+
 export default function CheckoutPage() {
   const { cart, subtotal, clearCart, setIsOpen } = useCart();
   const { user } = useAuth();
@@ -15,6 +17,7 @@ export default function CheckoutPage() {
 
   const [loading, setLoading] = useState(false);
   const [stripeLoading, setStripeLoading] = useState(false);
+  const [locationData, setLocationData] = useState(null);
   const [formData, setFormData] = useState({
     fullName: user?.name || '',
     email: user?.email || '',
@@ -35,6 +38,19 @@ export default function CheckoutPage() {
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleLocationSelect = (data) => {
+    if (!data) return;
+    if (data.lat != null && data.lng != null) {
+      setLocationData({ lat: data.lat, lng: data.lng });
+    }
+    setFormData((prev) => ({
+      ...prev,
+      addressLine1: data.address || prev.addressLine1,
+      city: data.city || prev.city,
+      state: data.province || prev.state,
+    }));
   };
 
   // COD flow
@@ -64,6 +80,7 @@ export default function CheckoutPage() {
         },
         paymentMethod: 'COD',
         notes: formData.notes,
+        ...(locationData ? { location: locationData } : {}),
       };
 
       const response = await createOrder(payload);
@@ -103,6 +120,7 @@ export default function CheckoutPage() {
         state: formData.state,
       },
       notes: formData.notes,
+      ...(locationData ? { location: locationData } : {}),
     }));
 
     setStripeLoading(true);
@@ -146,6 +164,10 @@ export default function CheckoutPage() {
                 <div>
                   <label className="block text-xs font-bold uppercase mb-1">Phone *</label>
                   <input type="tel" name="phone" value={formData.phone} onChange={handleChange} className="w-full border rounded-lg p-2" required />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold uppercase mb-1">Pin Location on Map (Optional)</label>
+                  <LocationPicker onLocationSelect={handleLocationSelect} />
                 </div>
                 <div>
                   <label className="block text-xs font-bold uppercase mb-1">Address *</label>
@@ -295,6 +317,13 @@ export default function CheckoutPage() {
                   className="w-full bg-[#fafafa] border border-gray-200 rounded-xl px-4 py-3 text-sm text-black outline-none focus:border-[#4f378a] transition-all"
                   required
                 />
+              </div>
+
+              <div>
+                <label className="block text-[10px] font-bold tracking-wider uppercase text-gray-400 mb-1">
+                  PIN LOCATION ON MAP (OPTIONAL)
+                </label>
+                <LocationPicker onLocationSelect={handleLocationSelect} />
               </div>
 
               <div>

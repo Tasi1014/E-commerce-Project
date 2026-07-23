@@ -60,9 +60,21 @@ export default function OrdersPage() {
                   ))}
                   {order.items.length > 2 && <p className="text-xs text-gray-500">+{order.items.length - 2} more</p>}
                 </div>
-                <Link to={`/order-confirmation/${order._id}`} className="text-[#4f378a] text-sm underline mt-3 inline-block">
-                  View Details
-                </Link>
+                <div className="flex items-center gap-4 mt-3">
+                  <Link to={`/order-confirmation/${order._id}`} className="text-[#4f378a] text-sm underline inline-block">
+                    View Details
+                  </Link>
+                  {order.location?.lat && order.location?.lng && (
+                    <a
+                      href={`https://www.openstreetmap.org/?mlat=${order.location.lat}&mlon=${order.location.lng}#map=17/${order.location.lat}/${order.location.lng}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-[#4f378a] text-sm underline"
+                    >
+                      View on map
+                    </a>
+                  )}
+                </div>
               </div>
             ))}
           </div>

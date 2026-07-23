@@ -2,7 +2,7 @@ import Order from '../models/Order.js';
 import Cart from '../models/Cart.js';
 import Product from '../models/Product.js';
 
-export const createOrderFromCart = async (userId, shippingAddress, paymentMethod, notes = '', stripeSessionId = null) => {
+export const createOrderFromCart = async (userId, shippingAddress, paymentMethod, notes = '', stripeSessionId = null, location = null) => {
   // ── Idempotency guard ───────────────────────────────────────────────────────
   // If a stripeSessionId is provided, check whether we already created an order
   // for this Stripe session (handles React double-invoke / network retries).
@@ -51,6 +51,7 @@ export const createOrderFromCart = async (userId, shippingAddress, paymentMethod
       shippingCost: 0,
       totalAmount: subtotal,
       notes,
+      ...(location && typeof location.lat === 'number' && typeof location.lng === 'number' ? { location } : {}),
       // Store session id so repeated calls return this same order (idempotency)
       ...(stripeSessionId ? { stripeSessionId } : {}),
     });

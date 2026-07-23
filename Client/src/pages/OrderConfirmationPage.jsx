@@ -40,6 +40,18 @@ export default function OrderConfirmationPage() {
         <p className="text-gray-600 mb-4">Thank you for shopping with PEAK.</p>
         <p className="text-sm mb-2">Order ID: {order._id}</p>
         <p className="text-sm mb-4">Payment method: {order.paymentMethod}</p>
+        {order.location?.lat && order.location?.lng && (
+          <p className="text-sm mb-4">
+            <a
+              href={`https://www.openstreetmap.org/?mlat=${order.location.lat}&mlon=${order.location.lng}#map=17/${order.location.lat}/${order.location.lng}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-[#4f378a] underline"
+            >
+              View delivery location on map
+            </a>
+          </p>
+        )}
         <Link to="/orders" className="text-[#4f378a] underline">View my orders</Link>
         <div className="mt-6">
           <Link to="/shop-all" className="inline-block px-6 py-2 bg-[#4f378a] text-white rounded-full">Continue Shopping</Link>

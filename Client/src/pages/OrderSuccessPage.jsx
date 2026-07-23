@@ -32,11 +32,11 @@ export default function OrderSuccessPage() {
       return;
     }
 
-    const { shippingAddress, notes } = JSON.parse(saved);
+    const { shippingAddress, notes, location } = JSON.parse(saved);
 
     const completeOrder = async () => {
       try {
-        const response = await verifyStripePaymentAndCreateOrder(sessionId, shippingAddress, notes);
+        const response = await verifyStripePaymentAndCreateOrder(sessionId, shippingAddress, notes, location);
         const orderId = response.data.orderId;
         localStorage.removeItem('checkout_address');
 

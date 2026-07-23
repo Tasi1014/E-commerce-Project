@@ -33,6 +33,10 @@ const orderSchema = new mongoose.Schema(
     },
     items: [orderItemSchema],
     shippingAddress: addressSchema,
+    location: {
+      lat: { type: Number },
+      lng: { type: Number },
+    },
     paymentMethod: {
       type: String,
       enum: ['COD', 'Stripe'],

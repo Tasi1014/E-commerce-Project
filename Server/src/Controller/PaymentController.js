@@ -40,7 +40,7 @@ export const createCheckoutSession = async (req, res) => {
 
 export const verifyAndCreateOrder = async (req, res) => {
   try {
-    const { session_id, shippingAddress, notes } = req.body;
+    const { session_id, shippingAddress, notes, location } = req.body;
     if (!session_id) {
       return res.status(400).json({ success: false, message: 'Missing session_id' });
     }
@@ -54,7 +54,7 @@ export const verifyAndCreateOrder = async (req, res) => {
 
     // Pass session_id as the idempotency key – if an order for this session
     // already exists it will be returned instead of creating a duplicate.
-    const order = await createOrderFromCart(userId, shippingAddress, 'Stripe', notes, session_id);
+    const order = await createOrderFromCart(userId, shippingAddress, 'Stripe', notes, session_id, location);
     res.json({ success: true, orderId: order._id });
   } catch (err) {
     console.error(err);

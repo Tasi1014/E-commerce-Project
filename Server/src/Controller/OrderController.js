@@ -25,13 +25,13 @@ const restoreStock = async (decrementedItems) => {
 export const createOrder = async (req, res) => {
   try {
     const userId = req.user.userId;
-    const { shippingAddress, paymentMethod, notes } = req.body;
+    const { shippingAddress, paymentMethod, notes, location } = req.body;
 
     if (paymentMethod !== 'COD') {
       return res.status(400).json({ success: false, message: 'Only COD supported here' });
     }
 
-    const order = await createOrderFromCart(userId, shippingAddress, paymentMethod, notes);
+    const order = await createOrderFromCart(userId, shippingAddress, paymentMethod, notes, null, location);
     res.status(201).json({ success: true, order });
   } catch (error) {
     console.error('COD order error:', error);
