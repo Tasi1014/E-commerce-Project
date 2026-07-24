@@ -1,7 +1,13 @@
 import { useState, useEffect, useMemo } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { toast } from "sonner";
-import { FiChevronDown, FiChevronUp, FiHeart, FiMinus, FiPlus } from "react-icons/fi";
+import {
+  FiChevronDown,
+  FiChevronUp,
+  FiHeart,
+  FiMinus,
+  FiPlus,
+} from "react-icons/fi";
 import { FaHeart } from "react-icons/fa";
 import SingleProductItem from "../Components/Product/SingleProductGridItem";
 import { useWishlist } from "../context/WishlistContext";
@@ -34,8 +40,9 @@ export default function ProductDetailPage() {
   });
 
   // Quantity handlers
-  const increaseQuantity = () => setQuantity(prev => prev + 1);
-  const decreaseQuantity = () => setQuantity(prev => (prev > 1 ? prev - 1 : 1));
+  const increaseQuantity = () => setQuantity((prev) => prev + 1);
+  const decreaseQuantity = () =>
+    setQuantity((prev) => (prev > 1 ? prev - 1 : 1));
 
   // Fetch product and recommendations (exactly 4, filtered)
   useEffect(() => {
@@ -60,7 +67,8 @@ export default function ProductDetailPage() {
 
         setProduct(mappedProduct);
         setActiveImg(mappedProduct.img);
-        if (mappedProduct.colors.length) setSelectedColor(mappedProduct.colors[0]);
+        if (mappedProduct.colors.length)
+          setSelectedColor(mappedProduct.colors[0]);
         if (mappedProduct.sizes.length) setSelectedSize(mappedProduct.sizes[0]);
 
         // Fetch recommendations (limit 4, same category)
@@ -69,8 +77,10 @@ export default function ProductDetailPage() {
           limit: 4,
         });
         // Filter out current product (in case backend didn't exclude)
-        const filtered = recRes.data.products.filter(p => p._id !== fetchedProduct._id);
-        const mappedRecs = filtered.map(p => ({
+        const filtered = recRes.data.products.filter(
+          (p) => p._id !== fetchedProduct._id,
+        );
+        const mappedRecs = filtered.map((p) => ({
           id: p._id,
           name: p.name,
           price: `$${p.price.toFixed(2)}`,
@@ -97,7 +107,7 @@ export default function ProductDetailPage() {
   const isProductInWishlist = isWishlisted(product ? product.id : null);
 
   const toggleAccordion = (section) => {
-    setAccordionOpen(prev => ({ ...prev, [section]: !prev[section] }));
+    setAccordionOpen((prev) => ({ ...prev, [section]: !prev[section] }));
   };
 
   const handleWishlistToggle = () => {
@@ -111,10 +121,57 @@ export default function ProductDetailPage() {
     toast.success(`${quantity} × ${product.name} added to cart`);
   };
 
+  const handleBuyNow = async () => {
+    if (!product) return;
+    addToCart(product, selectedColor, selectedSize, quantity);
+    navigate("/checkout");
+  };
+
   if (loading) {
     return (
-      <div className="bg-[#F5F0EB] min-h-screen flex items-center justify-center">
-        <div className="text-[#49454f]">Loading product details...</div>
+      <div className="bg-[#F5F0EB] min-h-screen py-10 md:py-16 px-4 sm:px-8 md:px-16 text-[#1d1b20]">
+        <div className="max-w-[1440px] mx-auto">
+          {/* Breadcrumb skeleton */}
+          <div className="flex items-center gap-2 text-xs sm:text-sm font-semibold text-[#49454f] mb-8">
+            <div className="h-4 w-12 bg-gray-200 rounded-md animate-pulse" />
+            <span>/</span>
+            <div className="h-4 w-16 bg-gray-200 rounded-md animate-pulse" />
+            <span>/</span>
+            <div className="h-4 w-24 bg-gray-200 rounded-md animate-pulse" />
+          </div>
+
+          {/* MAIN PRODUCT SKELETON */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-start mb-20">
+            {/* LEFT COLUMN: GALLERY SKELETON */}
+            <div className="flex flex-col gap-4">
+              <div className="relative aspect-square lg:aspect-auto lg:h-[450px] lg:max-h-[450px] w-full rounded-2xl md:rounded-3xl overflow-hidden bg-gray-200 animate-pulse" />
+            </div>
+
+            {/* RIGHT COLUMN: DETAILS SKELETON */}
+            <div className="flex flex-col">
+              <div className="h-8 sm:h-10 md:h-12 bg-gray-200 rounded-xl w-3/4 animate-pulse mb-3" />
+              <div className="h-7 bg-gray-200 rounded-xl w-1/4 animate-pulse mb-6" />
+              <div className="space-y-2 mb-8">
+                <div className="h-4 bg-gray-200 rounded-md w-full animate-pulse" />
+                <div className="h-4 bg-gray-200 rounded-md w-4/5 animate-pulse" />
+              </div>
+
+              {/* ACTION BUTTONS ROW SKELETON */}
+              <div className="flex flex-wrap gap-4 items-center mb-8">
+                <div className="w-[120px] h-10 rounded-full bg-gray-200 animate-pulse" />
+                <div className="flex-1 min-w-[120px] h-14 rounded-full bg-gray-200 animate-pulse" />
+                <div className="flex-1 min-w-[120px] h-14 rounded-full bg-gray-200 animate-pulse" />
+                <div className="w-[56px] h-[56px] rounded-full bg-gray-200 animate-pulse shrink-0" />
+              </div>
+
+              {/* ACCORDION SKELETONS */}
+              <div className="border-t border-[#e6e0e9] mt-2 space-y-4 pt-4">
+                <div className="h-5 bg-gray-200 rounded-md w-1/2 animate-pulse" />
+                <div className="h-5 bg-gray-200 rounded-md w-1/2 animate-pulse" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
@@ -141,11 +198,20 @@ export default function ProductDetailPage() {
       <div className="max-w-[1440px] mx-auto">
         {/* BREADCRUMB */}
         <div className="flex flex-wrap items-center gap-2 text-xs sm:text-sm font-semibold text-[#49454f] mb-8">
-          <Link to="/" className="hover:text-[#4f378a] transition-colors">Home</Link>
+          <Link to="/" className="hover:text-[#4f378a] transition-colors">
+            Home
+          </Link>
           <span>/</span>
-          <Link to="/shop-all" className="hover:text-[#4f378a] transition-colors">Shop All</Link>
+          <Link
+            to="/shop-all"
+            className="hover:text-[#4f378a] transition-colors"
+          >
+            Shop All
+          </Link>
           <span>/</span>
-          <span className="text-[#1d1b20] font-bold truncate max-w-[150px] sm:max-w-none">{product.category}</span>
+          <span className="text-[#1d1b20] font-bold truncate max-w-[150px] sm:max-w-none">
+            {product.category}
+          </span>
         </div>
 
         {/* MAIN PRODUCT SECTION */}
@@ -153,7 +219,11 @@ export default function ProductDetailPage() {
           {/* LEFT COLUMN: GALLERY */}
           <div className="flex flex-col gap-4">
             <div className="relative aspect-square lg:aspect-auto lg:h-[450px] lg:max-h-[450px] w-full rounded-2xl md:rounded-3xl overflow-hidden shadow-sm border border-[#e6e0e9] bg-white">
-              <img src={activeImg} alt={product.name} className="w-full h-full object-cover transition-all duration-500" />
+              <img
+                src={activeImg}
+                alt={product.name}
+                className="w-full h-full object-cover transition-all duration-500"
+              />
             </div>
             {product.thumbnails && product.thumbnails.length > 0 && (
               <div className="grid grid-cols-4 gap-3 sm:gap-4">
@@ -167,7 +237,11 @@ export default function ProductDetailPage() {
                         : "border border-[#e6e0e9] opacity-75 hover:opacity-100 hover:scale-102"
                     }`}
                   >
-                    <img src={thumbUrl} alt={`${product.name} view ${idx + 1}`} className="w-full h-full object-cover" />
+                    <img
+                      src={thumbUrl}
+                      alt={`${product.name} view ${idx + 1}`}
+                      className="w-full h-full object-cover"
+                    />
                   </button>
                 ))}
               </div>
@@ -179,7 +253,9 @@ export default function ProductDetailPage() {
             <h1 className="text-[32px] sm:text-[40px] md:text-[48px] font-extrabold tracking-tight leading-none mb-2">
               {product.name}
             </h1>
-            <p className="text-2xl font-bold text-[#1d1b20]/90 mb-6">{product.price}</p>
+            <p className="text-2xl font-bold text-[#1d1b20]/90 mb-6">
+              {product.price}
+            </p>
             <p className="text-sm sm:text-base text-[#49454f] font-medium leading-relaxed mb-8">
               {product.description}
             </p>
@@ -188,7 +264,10 @@ export default function ProductDetailPage() {
             {product.colors && product.colors.length > 0 && (
               <div className="mb-6">
                 <span className="text-xs font-bold tracking-wider text-[#49454f] uppercase block mb-3">
-                  COLOR: <span className="text-[#1d1b20] font-extrabold">{selectedColor?.name}</span>
+                  COLOR:{" "}
+                  <span className="text-[#1d1b20] font-extrabold">
+                    {selectedColor?.name}
+                  </span>
                 </span>
                 <div className="flex gap-3">
                   {product.colors.map((color) => (
@@ -197,7 +276,9 @@ export default function ProductDetailPage() {
                       onClick={() => setSelectedColor(color)}
                       style={{ backgroundColor: color.hex }}
                       className={`w-8 h-8 rounded-full border border-black/10 cursor-pointer transition-all duration-300 ${
-                        selectedColor?.name === color.name ? "ring-2 ring-offset-2 ring-[#4f378a]" : "hover:scale-110"
+                        selectedColor?.name === color.name
+                          ? "ring-2 ring-offset-2 ring-[#4f378a]"
+                          : "hover:scale-110"
                       }`}
                       title={color.name}
                     />
@@ -210,7 +291,9 @@ export default function ProductDetailPage() {
             {product.sizes && product.sizes.length > 0 && (
               <div className="mb-8">
                 <div className="flex justify-between items-center mb-3">
-                  <span className="text-xs font-bold tracking-wider text-[#49454f] uppercase">SIZE</span>
+                  <span className="text-xs font-bold tracking-wider text-[#49454f] uppercase">
+                    SIZE
+                  </span>
                   <button
                     type="button"
                     onClick={() => toast.info("Size guide coming soon")}
@@ -247,7 +330,9 @@ export default function ProductDetailPage() {
                 >
                   <FiMinus className="w-4 h-4" />
                 </button>
-                <span className="w-10 text-center font-semibold text-[#1d1b20]">{quantity}</span>
+                <span className="w-10 text-center font-semibold text-[#1d1b20]">
+                  {quantity}
+                </span>
                 <button
                   onClick={increaseQuantity}
                   className="w-10 h-10 flex items-center justify-center text-[#1d1b20] hover:bg-[#f2ecf4] transition-colors"
@@ -261,9 +346,18 @@ export default function ProductDetailPage() {
               <button
                 type="button"
                 onClick={handleAddToCart}
-                className="flex-1 min-w-[140px] py-4 bg-[#4f378a] text-white font-bold rounded-full cursor-pointer hover:bg-[#5f479a] transition-all hover:scale-[1.02] shadow-[0_8px_24px_rgba(79,55,138,0.25)] text-center text-sm sm:text-base border-none"
+                className="flex-1 min-w-[120px] py-4 bg-[#4f378a] text-white font-bold rounded-full cursor-pointer hover:bg-[#5f479a] transition-all hover:scale-[1.02] shadow-[0_8px_24px_rgba(79,55,138,0.25)] text-center text-sm sm:text-base border-none"
               >
                 Add to Cart
+              </button>
+
+              {/* Buy Now button */}
+              <button
+                type="button"
+                onClick={handleBuyNow}
+                className="flex-1 min-w-[120px] py-4 bg-black text-white font-bold rounded-full cursor-pointer hover:bg-gray-900 transition-all hover:scale-[1.02] text-center text-sm sm:text-base border-none"
+              >
+                Buy Now
               </button>
 
               {/* Wishlist button */}
@@ -273,7 +367,11 @@ export default function ProductDetailPage() {
                 className="w-[56px] h-[56px] min-w-[56px] min-h-[56px] max-w-[56px] max-h-[56px] rounded-full border border-[#cbc4d2] bg-white flex items-center justify-center cursor-pointer transition-all duration-300 hover:scale-[1.05] hover:border-[#4f378a] hover:text-[#4f378a] shrink-0 p-0"
                 aria-label="Add to Wishlist"
               >
-                {isProductInWishlist ? <FaHeart className="w-5 h-5 text-[#4f378a]" /> : <FiHeart className="w-5 h-5 text-[#1d1b20]" />}
+                {isProductInWishlist ? (
+                  <FaHeart className="w-5 h-5 text-[#4f378a]" />
+                ) : (
+                  <FiHeart className="w-5 h-5 text-[#1d1b20]" />
+                )}
               </button>
             </div>
 
@@ -281,37 +379,75 @@ export default function ProductDetailPage() {
             <div className="border-t border-[#e6e0e9] mt-2">
               {product.details && product.details.length > 0 && (
                 <div className="border-b border-[#e6e0e9] py-4">
-                  <button onClick={() => toggleAccordion("details")} className="w-full flex justify-between items-center text-left bg-transparent border-none cursor-pointer p-0">
-                    <span className="text-xs sm:text-sm font-extrabold tracking-wider text-[#1d1b20]">DETAILS & COMPOSITION</span>
-                    {accordionOpen.details ? <FiChevronUp className="w-5 h-5 text-[#49454f]" /> : <FiChevronDown className="w-5 h-5 text-[#49454f]" />}
+                  <button
+                    onClick={() => toggleAccordion("details")}
+                    className="w-full flex justify-between items-center text-left bg-transparent border-none cursor-pointer p-0"
+                  >
+                    <span className="text-xs sm:text-sm font-extrabold tracking-wider text-[#1d1b20]">
+                      DETAILS & COMPOSITION
+                    </span>
+                    {accordionOpen.details ? (
+                      <FiChevronUp className="w-5 h-5 text-[#49454f]" />
+                    ) : (
+                      <FiChevronDown className="w-5 h-5 text-[#49454f]" />
+                    )}
                   </button>
                   {accordionOpen.details && (
                     <ul className="mt-3.5 pl-5 list-disc text-xs sm:text-sm text-[#49454f] space-y-1.5 font-medium leading-relaxed">
-                      {product.details.map((detail, idx) => <li key={idx}>{detail}</li>)}
+                      {product.details.map((detail, idx) => (
+                        <li key={idx}>{detail}</li>
+                      ))}
                     </ul>
                   )}
                 </div>
               )}
               <div className="border-b border-[#e6e0e9] py-4">
-                <button onClick={() => toggleAccordion("shipping")} className="w-full flex justify-between items-center text-left bg-transparent border-none cursor-pointer p-0">
-                  <span className="text-xs sm:text-sm font-extrabold tracking-wider text-[#1d1b20]">SHIPPING & RETURNS</span>
-                  {accordionOpen.shipping ? <FiChevronUp className="w-5 h-5 text-[#49454f]" /> : <FiChevronDown className="w-5 h-5 text-[#49454f]" />}
+                <button
+                  onClick={() => toggleAccordion("shipping")}
+                  className="w-full flex justify-between items-center text-left bg-transparent border-none cursor-pointer p-0"
+                >
+                  <span className="text-xs sm:text-sm font-extrabold tracking-wider text-[#1d1b20]">
+                    SHIPPING & RETURNS
+                  </span>
+                  {accordionOpen.shipping ? (
+                    <FiChevronUp className="w-5 h-5 text-[#49454f]" />
+                  ) : (
+                    <FiChevronDown className="w-5 h-5 text-[#49454f]" />
+                  )}
                 </button>
                 {accordionOpen.shipping && (
                   <div className="mt-3 text-xs sm:text-sm text-[#49454f] space-y-2 font-medium leading-relaxed">
-                    <p>Free standard worldwide shipping on orders over $150. 3-5 business days domestic, 5-10 international.</p>
-                    <p>Returns accepted within 30 days. Items must be unworn with tags attached.</p>
+                    <p>
+                      Free standard worldwide shipping on orders over $150. 3-5
+                      business days domestic, 5-10 international.
+                    </p>
+                    <p>
+                      Returns accepted within 30 days. Items must be unworn with
+                      tags attached.
+                    </p>
                   </div>
                 )}
               </div>
               <div className="border-b border-[#e6e0e9] py-4">
-                <button onClick={() => toggleAccordion("sustainability")} className="w-full flex justify-between items-center text-left bg-transparent border-none cursor-pointer p-0">
-                  <span className="text-xs sm:text-sm font-extrabold tracking-wider text-[#1d1b20]">SUSTAINABILITY & ETHICS</span>
-                  {accordionOpen.sustainability ? <FiChevronUp className="w-5 h-5 text-[#49454f]" /> : <FiChevronDown className="w-5 h-5 text-[#49454f]" />}
+                <button
+                  onClick={() => toggleAccordion("sustainability")}
+                  className="w-full flex justify-between items-center text-left bg-transparent border-none cursor-pointer p-0"
+                >
+                  <span className="text-xs sm:text-sm font-extrabold tracking-wider text-[#1d1b20]">
+                    SUSTAINABILITY & ETHICS
+                  </span>
+                  {accordionOpen.sustainability ? (
+                    <FiChevronUp className="w-5 h-5 text-[#49454f]" />
+                  ) : (
+                    <FiChevronDown className="w-5 h-5 text-[#49454f]" />
+                  )}
                 </button>
                 {accordionOpen.sustainability && (
                   <div className="mt-3 text-xs sm:text-sm text-[#49454f] space-y-2 font-medium leading-relaxed">
-                    <p>PEAK uses GOTS Certified organic cotton, ethically sourced materials, and limited‑batch production to reduce waste.</p>
+                    <p>
+                      PEAK uses GOTS Certified organic cotton, ethically sourced
+                      materials, and limited‑batch production to reduce waste.
+                    </p>
                   </div>
                 )}
               </div>
@@ -323,8 +459,15 @@ export default function ProductDetailPage() {
         {recommendations.length > 0 && (
           <div className="border-t border-[#e6e0e9] pt-16 mt-20">
             <div className="flex justify-between items-center mb-10">
-              <h2 className="text-2xl sm:text-[30px] font-extrabold tracking-tight text-[#1d1b20]">You May Also Like</h2>
-              <Link to="/shop-all" className="text-xs font-bold tracking-[0.1em] uppercase text-[#4f378a] hover:opacity-75 transition-opacity">VIEW ALL</Link>
+              <h2 className="text-2xl sm:text-[30px] font-extrabold tracking-tight text-[#1d1b20]">
+                You May Also Like
+              </h2>
+              <Link
+                to="/shop-all"
+                className="text-xs font-bold tracking-[0.1em] uppercase text-[#4f378a] hover:opacity-75 transition-opacity"
+              >
+                VIEW ALL
+              </Link>
             </div>
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8">
               {recommendations.map((rec) => (

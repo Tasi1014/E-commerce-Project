@@ -74,6 +74,7 @@ export default function ShopAllPage() {
         }
       } catch (error) {
         console.error(error);
+        await new Promise((resolve) => setTimeout(resolve, 3000))
         toast.error("Failed to load products.");
         setProducts([]);
         setPagination({ currentPage: 1, totalPages: 1, totalProducts: 0 });
@@ -120,10 +121,60 @@ export default function ShopAllPage() {
 
   const formatPrice = (price) => `$${price.toFixed(2)}`;
 
+  // ── Skeleton card matching SingleProductItem proportions ─────────────────
+  const SkeletonCard = () => (
+    <div className="bg-white rounded-xl md:rounded-2xl overflow-hidden shadow-[0_2px_12px_rgba(0,0,0,0.06)] animate-pulse">
+      <div className="aspect-square bg-gray-200" />
+      <div className="p-3 sm:p-4 md:p-5 space-y-2">
+        <div className="h-4 bg-gray-200 rounded-md w-3/4" />
+        <div className="h-4 bg-gray-200 rounded-md w-1/3" />
+      </div>
+    </div>
+  );
+
   if (loading && products.length === 0) {
     return (
-      <div className="bg-[#F5F0EB] min-h-screen py-10 px-4 flex items-center justify-center">
-        <div className="text-[#49454f]">Loading products...</div>
+      <div className="bg-[#F5F0EB] min-h-screen py-10 md:py-16 px-4 sm:px-8 md:px-16 text-[#1d1b20]">
+        <div className="max-w-[1440px] mx-auto">
+          {/* Real header layout to prevent shift */}
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
+            <div>
+              <span className="text-xs font-bold tracking-[0.2em] text-[#4f378a]/70 uppercase block mb-1">
+                NEW SEASON
+              </span>
+              <h1 className="text-[28px] sm:text-[36px] md:text-[44px] lg:text-[52px] font-extrabold tracking-tight leading-none">
+                {searchTerm ? `Search: “${searchTerm}”` : "Shop All"}
+              </h1>
+            </div>
+            <p className="max-w-md text-xs sm:text-sm md:text-base text-[#49454f] leading-relaxed md:text-right">
+              Explore our curated collection of essentials...
+            </p>
+          </div>
+
+          {/* Controls bar */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-[#e6e0e9] pb-6 mb-8">
+            <div className="flex flex-wrap gap-2.5">
+              {categories.map((cat) => (
+                <div
+                  key={cat}
+                  className={`px-5 py-2.5 text-xs sm:text-sm font-semibold rounded-full ${
+                    selectedCategory === cat ? "bg-[#4f378a] text-white" : "bg-[#ece5dd]/80 text-[#49454f]"
+                  }`}
+                >
+                  {cat}
+                </div>
+              ))}
+            </div>
+            <div className="text-xs sm:text-sm font-semibold text-[#49454f]">
+              Sort by: {sortBy}
+            </div>
+          </div>
+
+          {/* Skeleton Product Grid matching actual grid breakpoints */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-6 md:gap-8 mb-16">
+            {Array.from({ length: 8 }).map((_, i) => <SkeletonCard key={i} />)}
+          </div>
+        </div>
       </div>
     );
   }

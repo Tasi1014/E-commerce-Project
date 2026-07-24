@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
-import { FiMapPin, FiCreditCard, FiCheck, FiUser, FiMail, FiPhone, FiFileText } from 'react-icons/fi';
+import { FiMapPin, FiCreditCard, FiCheck, FiUser, FiMail, FiPhone, FiFileText, FiMinus, FiPlus } from 'react-icons/fi';
 import { BsReceipt, BsTruck } from 'react-icons/bs';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -11,7 +11,7 @@ import { createStripeCheckoutSession } from '../api/paymentApi';
 import LocationPicker from '../Components/Checkout/LocationPicker';
 
 export default function CheckoutPage() {
-  const { cart, subtotal, clearCart, setIsOpen } = useCart();
+  const { cart, subtotal, clearCart, setIsOpen, updateQuantity } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -394,16 +394,36 @@ export default function CheckoutPage() {
                 </div>
               </div>
 
-              <div className="space-y-3 max-h-64 overflow-y-auto pr-1">
+              <div className="space-y-4 max-h-64 overflow-y-auto pr-1">
                 {cart.map((item) => (
-                  <div key={item.id} className="flex justify-between items-start text-sm">
-                    <div>
-                      <span className="font-bold text-black block">{item.quantity} × {item.name}</span>
+                  <div key={item.id} className="flex justify-between items-start text-sm gap-2">
+                    <div className="flex-1 min-w-0">
+                      <span className="font-bold text-black block truncate">{item.name}</span>
                       <span className="text-xs text-gray-400 font-medium mt-0.5 block">
                         {item.colorName ? `${item.colorName} • Size ${item.size}` : 'Premium finish, ready to ship'}
                       </span>
+                      {/* Quantity controls */}
+                      <div className="flex items-center gap-1.5 mt-2">
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(item.id, item.colorName, item.size, -1)}
+                          className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-[#4f378a] hover:text-[#4f378a] transition-colors bg-white"
+                          aria-label="Decrease quantity"
+                        >
+                          <FiMinus size={10} />
+                        </button>
+                        <span className="text-xs font-bold text-black w-4 text-center">{item.quantity}</span>
+                        <button
+                          type="button"
+                          onClick={() => updateQuantity(item.id, item.colorName, item.size, 1)}
+                          className="w-6 h-6 rounded-full border border-gray-300 flex items-center justify-center text-gray-600 hover:border-[#4f378a] hover:text-[#4f378a] transition-colors bg-white"
+                          aria-label="Increase quantity"
+                        >
+                          <FiPlus size={10} />
+                        </button>
+                      </div>
                     </div>
-                    <span className="font-bold text-black shrink-0 ml-4">{item.price}</span>
+                    <span className="font-bold text-black shrink-0 ml-2 pt-0.5">{item.price}</span>
                   </div>
                 ))}
               </div>
