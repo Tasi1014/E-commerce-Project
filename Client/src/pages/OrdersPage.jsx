@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'sonner';
 import { fetchUserOrders } from '../api/orderApi';
+import OrderDetailsModal from './OrderDetailsModal';
 
 export default function OrdersPage() {
   const [orders, setOrders] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedOrder, setSelectedOrder] = useState(null);
 
   useEffect(() => {
     const fetchOrders = async () => {
@@ -61,15 +63,20 @@ export default function OrdersPage() {
                   {order.items.length > 2 && <p className="text-xs text-gray-500">+{order.items.length - 2} more</p>}
                 </div>
                 <div className="flex items-center gap-4 mt-3">
-                  <Link to={`/order-confirmation/${order._id}`} className="text-[#4f378a] text-sm underline inline-block">
+                  <button
+                    onClick={() => setSelectedOrder(order)}
+                    className="text-[#4f378a] text-sm underline inline-block bg-transparent border-none cursor-pointer p-0"
+                  >
                     View Details
-                  </Link>
+                  </button>
                 </div>
               </div>
             ))}
           </div>
         )}
       </div>
+
+      <OrderDetailsModal order={selectedOrder} onClose={() => setSelectedOrder(null)} />
     </div>
   );
 }
