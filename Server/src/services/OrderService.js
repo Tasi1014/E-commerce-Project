@@ -1,6 +1,7 @@
 import Order from '../models/Order.js';
 import Cart from '../models/Cart.js';
 import Product from '../models/Product.js';
+import { sendOrderConfirmationEmail } from '../utils/mailer.js';
 
 export const createOrderFromCart = async (userId, shippingAddress, paymentMethod, notes = '', stripeSessionId = null, location = null) => {
   // ── Idempotency guard ───────────────────────────────────────────────────────
@@ -57,7 +58,7 @@ export const createOrderFromCart = async (userId, shippingAddress, paymentMethod
     });
 
     await Cart.updateOne({ user: userId }, { $set: { items: [] } });
-
+    sendOrderConfirmationEmail(order);
     return order;
   } catch (error) {
     // Rollback stock for any already‑decremented products
