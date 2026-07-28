@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { FiMapPin, FiCreditCard, FiCheck, FiUser, FiMail, FiPhone, FiFileText, FiMinus, FiPlus } from 'react-icons/fi';
@@ -14,6 +14,7 @@ export default function CheckoutPage() {
   const { cart, subtotal, clearCart, setIsOpen, updateQuantity, isCartLoading } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
+  const orderPlacedRef = useRef(false);
 
   const [loading, setLoading] = useState(false);
   const [stripeLoading, setStripeLoading] = useState(false);
@@ -30,7 +31,7 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState('COD');
 
   useEffect(() => {
-    if (!isCartLoading && cart.length === 0) {
+    if (!isCartLoading && !orderPlacedRef.current && cart.length === 0) {
       toast.error('Your cart is empty');
       navigate('/shop-all');
     }
@@ -88,6 +89,7 @@ export default function CheckoutPage() {
       };
 
       const response = await createOrder(payload);
+      orderPlacedRef.current = true;
       toast.success('Order placed successfully!');
       clearCart();
       setIsOpen(false);
