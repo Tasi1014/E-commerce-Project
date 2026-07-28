@@ -21,16 +21,19 @@ export function CartProvider({ children }) {
   const [cart, setCart] = useState([]);
   const [isOpen, setIsOpen] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [isCartLoading, setIsCartLoading] = useState(true);
 
   useEffect(() => {
     if (user) {
       loadCart();
     } else {
       setCart([]);
+      setIsCartLoading(false);
     }
   }, [user]);
 
   const loadCart = async () => {
+    setIsCartLoading(true);
     try {
       const response = await fetchCart();
       const items = response.data.cart.items || [];
@@ -38,6 +41,8 @@ export function CartProvider({ children }) {
     } catch (err) {
       console.error("Failed to load cart", err);
       toast.error("Could not load your cart");
+    } finally {
+      setIsCartLoading(false);
     }
   };
 
@@ -53,7 +58,7 @@ export function CartProvider({ children }) {
   const addToCart = async (product, color = null, size = "", qty = 1) => {
     if (!user) {
       setShowLoginModal(true);
-      return;
+      return false;
     }
 
     try {
@@ -63,8 +68,10 @@ export function CartProvider({ children }) {
       toast.success(`${qty} × ${product.name} added to cart`, {
         action: { label: "View Cart", onClick: () => setIsOpen(true) },
       });
+      return true;
     } catch (err) {
       toast.error(err.response?.data?.message || "Failed to add to cart");
+      return false;
     }
   };
 
@@ -124,6 +131,7 @@ export function CartProvider({ children }) {
         subtotal,
         showLoginModal,
         closeLoginModal,
+        isCartLoading,
       }}
     >
       {children}

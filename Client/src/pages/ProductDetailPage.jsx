@@ -116,15 +116,15 @@ export default function ProductDetailPage() {
 
   const handleAddToCart = () => {
     if (!product) return;
-    // Pass quantity as the 4th argument (addToCart signature: product, color, size, quantity)
     addToCart(product, selectedColor, selectedSize, quantity);
-    toast.success(`${quantity} × ${product.name} added to cart`);
   };
 
   const handleBuyNow = async () => {
     if (!product) return;
-    addToCart(product, selectedColor, selectedSize, quantity);
-    navigate("/checkout");
+    const added = await addToCart(product, selectedColor, selectedSize, quantity);
+    if (added) {
+      navigate("/checkout");
+    }
   };
 
   if (loading) {

@@ -11,7 +11,7 @@ import { createStripeCheckoutSession } from '../api/paymentApi';
 import LocationPicker from '../Components/Checkout/LocationPicker';
 
 export default function CheckoutPage() {
-  const { cart, subtotal, clearCart, setIsOpen, updateQuantity } = useCart();
+  const { cart, subtotal, clearCart, setIsOpen, updateQuantity, isCartLoading } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
 
@@ -30,11 +30,11 @@ export default function CheckoutPage() {
   const [paymentMethod, setPaymentMethod] = useState('COD');
 
   useEffect(() => {
-    if (cart.length === 0) {
+    if (!isCartLoading && cart.length === 0) {
       toast.error('Your cart is empty');
       navigate('/shop-all');
     }
-  }, [cart, navigate]);
+  }, [cart, isCartLoading, navigate]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
