@@ -1,13 +1,18 @@
 import nodemailer from 'nodemailer';
+import dns from 'dns';
+
+// Forcing IPv4 lookups first to avoid Render's IPv6 outbound issues with Gmail SMTP
+dns.setDefaultResultOrder('ipv4first');
 
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
+  host: 'smtp.gmail.com',
+  port: 465,
+  secure: true,
   auth: {
     user: process.env.EMAIL_USER,
     pass: process.env.EMAIL_PASS,
   },
 });
-
 export const sendOrderConfirmationEmail = async (order) => {
   const itemsHtml = order.items
     .map(
