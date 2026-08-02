@@ -134,7 +134,7 @@ export default function ShopAllPage() {
 
   if (loading && products.length === 0) {
     return (
-      <div className="bg-[#F5F0EB] min-h-screen py-10 md:py-16 px-4 sm:px-8 md:px-16 text-[#1d1b20]">
+      <div className="bg-[#F5F0EB] min-h-screen pt-8 pb-10 md:pt-10 md:pb-16 px-4 sm:px-8 md:px-16 text-[#1d1b20]">
         <div className="max-w-[1440px] mx-auto">
           {/* Real header layout to prevent shift */}
           <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">
@@ -180,7 +180,7 @@ export default function ShopAllPage() {
   }
 
   return (
-    <div className="bg-[#F5F0EB] min-h-screen py-10 md:py-16 px-4 sm:px-8 md:px-16 text-[#1d1b20]">
+    <div className="bg-[#F5F0EB] min-h-screen pt-8 pb-10 md:pt-10 md:pb-16 px-4 sm:px-8 md:px-16 text-[#1d1b20]">
       <div className="max-w-[1440px] mx-auto">
         {/* Header */}
         <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 mb-12">

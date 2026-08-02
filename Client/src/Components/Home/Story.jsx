@@ -9,7 +9,7 @@ const stats = [
 
 export default function StorySection() {
   return (
-    <section className="py-16 sm:py-24 lg:py-28 px-4 sm:px-8 lg:px-16 bg-white border-y border-[#1d1b20]/10">
+    <section className="pt-10 pb-16 sm:pt-14 sm:pb-20 lg:pt-16 lg:pb-24 px-4 sm:px-8 lg:px-16 bg-white border-b border-[#1d1b20]/10">
       <div className="max-w-[1440px] mx-auto grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
 
         {/* LEFT COLUMN: EDITORIAL IMAGE WITH OVERLAY BADGE */}
