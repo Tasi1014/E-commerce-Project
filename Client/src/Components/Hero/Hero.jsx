@@ -1,96 +1,204 @@
+import { useState } from "react";
+import { Link } from "react-router-dom";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Autoplay, Pagination, EffectFade } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/effect-fade";
-import ButtonLink from "../UI/Link";
+import { FiArrowRight, FiCheckCircle, FiStar, FiShoppingBag, FiAward } from "react-icons/fi";
+import { BsStars } from "react-icons/bs";
 
 export default function Hero() {
   const images = [
-    "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=600&auto=format&fit=crop",
-    "https://images.unsplash.com/photo-1633450797676-8ab93caab915?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-    "https://images.unsplash.com/photo-1633450750940-4eabe49f4722?q=80&w=687&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    {
+      src: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=1000&auto=format&fit=crop",
+      tag: "Summer Collection",
+      title: "Monochrome Linen Blazer",
+      price: "$280.00",
+    },
+    {
+      src: "https://images.unsplash.com/photo-1539109136881-3be0616acf4b?q=80&w=1000&auto=format&fit=crop",
+      tag: "Trending Now",
+      title: "Silk Minimalist Trench",
+      price: "$340.00",
+    },
+    {
+      src: "https://images.unsplash.com/photo-1633450797676-8ab93caab915?q=80&w=1000&auto=format&fit=crop",
+      tag: "Handcrafted",
+      title: "Gold Link Bracelet",
+      price: "$299.00",
+    },
+    {
+      src: "https://images.unsplash.com/photo-1633450750940-4eabe49f4722?q=80&w=1000&auto=format&fit=crop",
+      tag: "Essential",
+      title: "Horizon Leather Timepiece",
+      price: "$210.00",
+    },
   ];
 
+  const [activeIndex, setActiveIndex] = useState(0);
+
   return (
-    <section className="bg-[#F5F0EB] py-6 sm:py-10 lg:py-12 flex items-center overflow-hidden">
-      <div className="max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-16 grid grid-cols-2 gap-3 xs:gap-6 sm:gap-10 lg:gap-16 items-center w-full">
-
-        {/* Text Section */}
-        <div className="z-10 text-left">
-          <h1 className="text-[20px] xs:text-[28px] sm:text-[40px] md:text-[48px] lg:text-[56px] xl:text-[64px] font-extrabold text-black leading-[1.08] mb-3 sm:mb-6 lg:mb-6 tracking-tight">
-            Elevate Your <br />
-            <span className="text-[#4f378a]">Everyday Style</span>
-          </h1>
-          <p className="text-[10px] xs:text-xs sm:text-sm md:text-base text-black leading-relaxed mb-4 sm:mb-6 lg:mb-8 max-w-[420px] mx-0">
-            Experience curated minimalism with our new collection designed for
-            the modern individual. Timeless pieces, modern silhouettes.
-          </p>
-          <div className="flex flex-wrap gap-2 sm:gap-4 lg:gap-5 justify-start">
-            <ButtonLink to="/shop-all" text="Shop now" />
-            <ButtonLink to="/shop-all" text="Explore" />
-          </div>
-
-          {/* Social proof */}
-          <div className="mt-5 sm:mt-8 lg:mt-10 flex items-center gap-2 sm:gap-4 lg:gap-6 justify-start">
-            <div className="flex -space-x-2 sm:-space-x-3">
-              {[1, 2, 3].map((i) => (
-                <div
-                  key={i}
-                  className="w-6 h-6 xs:w-8 xs:h-8 sm:w-9 sm:h-9 rounded-full border-2 border-[#111111] bg-neutral-800 overflow-hidden"
-                >
-                  <div className="w-full h-full bg-linear-to-tr opacity-80" />
-                </div>
-              ))}
-            </div>
-            <p className="text-[9px] xs:text-xs sm:text-sm text-black">
-              <span className="text-black font-medium">2.5k+</span> styles already curated
-            </p>
-          </div>
+    <section className="relative overflow-hidden bg-gradient-to-b from-[#F5F0EB] via-[#f8f4ef] to-[#F5F0EB]">
+      {/* ── TOP ANNOUNCEMENT TICKER MARQUEE ───────────────────────── */}
+      <div className="bg-[#261546] text-white py-2.5 overflow-hidden text-[11px] font-semibold tracking-wider uppercase border-b border-white/10 shadow-xs">
+        <div className="animate-marquee whitespace-nowrap flex items-center justify-around gap-8">
+          <span className="flex items-center gap-2 text-white/90">
+            <BsStars className="text-[#c8b7ff]" size={13} /> COMPLIMENTARY EXPRESS SHIPPING ON ORDERS OVER $150
+          </span>
+          <span className="text-[#c8b7ff]">•</span>
+          <span className="flex items-center gap-2 text-white/90">
+            DISCOVER THE NEW SUMMER 2026 COLLECTION
+          </span>
+          <span className="text-[#c8b7ff]">•</span>
+          <span className="flex items-center gap-2 text-white/90">
+            SUSTAINABLE MINIMALISM & ETHICAL CRAFTSMANSHIP
+          </span>
+          <span className="text-[#c8b7ff]">•</span>
+          <span className="flex items-center gap-2 text-white/90">
+            <BsStars className="text-[#c8b7ff]" size={13} /> GET 10% OFF YOUR FIRST ORDER WITH CODE: PEAK10
+          </span>
+          <span className="text-[#c8b7ff]">•</span>
+          {/* Duplicate set for smooth infinite marquee loop */}
+          <span className="flex items-center gap-2 text-white/90">
+            <BsStars className="text-[#c8b7ff]" size={13} /> COMPLIMENTARY EXPRESS SHIPPING ON ORDERS OVER $150
+          </span>
+          <span className="text-[#c8b7ff]">•</span>
+          <span className="flex items-center gap-2 text-white/90">
+            DISCOVER THE NEW SUMMER 2026 COLLECTION
+          </span>
+          <span className="text-[#c8b7ff]">•</span>
+          <span className="flex items-center gap-2 text-white/90">
+            SUSTAINABLE MINIMALISM & ETHICAL CRAFTSMANSHIP
+          </span>
         </div>
+      </div>
 
-        {/* Phone Mockup – perfectly scaled for both mobile and desktop viewports */}
-        <div className="relative flex justify-center items-center w-full min-w-0">
-          {/* Decorative background glow */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[160px] xs:w-[240px] sm:w-[350px] lg:w-[450px] h-[160px] xs:h-[240px] sm:h-[350px] lg:h-[450px] bg-[#4f378a]/20 blur-[50px] sm:blur-[100px] rounded-full -z-10 animate-pulse" />
+      {/* ── HERO CONTAINER ────────────────────────────────────────────── */}
+      <div className="max-w-[1440px] mx-auto px-4 sm:px-8 lg:px-16 py-8 sm:py-12 md:py-16 lg:py-20">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12 items-center">
 
-          {/* Phone Frame */}
-          <div className="relative w-[150px] h-[300px] xs:w-[180px] xs:h-[360px] sm:w-[220px] sm:h-[440px] md:w-[250px] md:h-[500px] lg:w-[270px] lg:h-[540px] bg-[#111111] rounded-[24px] xs:rounded-[30px] sm:rounded-[40px] lg:rounded-[48px] border-[5px] xs:border-[6px] sm:border-[8px] lg:border-[10px] border-[#222222] shadow-[0_25px_50px_-12px_rgba(0,0,0,0.8),0_0_20px_-5px_rgba(79,55,138,0.2)] overflow-hidden transition-all duration-300">
-            {/* Notch */}
-            <div className="absolute top-0 left-1/2 -translate-x-1/2 w-16 xs:w-20 sm:w-24 lg:w-28 h-3.5 xs:h-4 sm:h-5 lg:h-6 bg-[#222222] rounded-b-lg xs:rounded-b-xl lg:rounded-b-2xl z-30 flex items-end justify-center pb-0.5 sm:pb-1">
-              <div className="w-6 xs:w-7 sm:w-8 h-0.5 sm:h-1 bg-[#333333] rounded-full mb-0.5 sm:mb-1" />
+          {/* LEFT: EDITORIAL TYPOGRAPHY & CALL TO ACTION */}
+          <div className="lg:col-span-7 space-y-5 sm:space-y-7 z-10 text-left">
+            
+            {/* Pill Tag */}
+            <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-[#4f378a]/10 border border-[#4f378a]/20 text-[#4f378a] text-xs font-bold tracking-wider uppercase shadow-2xs">
+              <BsStars className="text-[#4f378a] animate-pulse" size={13} />
+              <span>Summer Collection 2026</span>
             </div>
 
-            {/* Swiper */}
-            <div className="w-full h-full relative z-10">
+            {/* Main Headline with Serif Accent */}
+            <h1 className="text-[34px] xs:text-[42px] sm:text-[56px] md:text-[64px] lg:text-[68px] font-heading font-extrabold text-[#1d1b20] leading-[1.05] tracking-tight">
+              Elevate Your <br className="hidden xs:inline" />
+              <span className="font-serif-editorial italic font-normal text-[#4f378a] block sm:inline sm:ml-2">
+                Everyday Style
+              </span>
+            </h1>
+
+            {/* Editorial Description */}
+            <p className="text-sm sm:text-base md:text-lg text-[#49454f] leading-relaxed max-w-xl font-normal">
+              Experience curated luxury & sustainable minimalism. Designed for the modern individual who values timeless silhouettes, material integrity, and effortless elegance.
+            </p>
+
+            {/* Primary & Secondary Call to Action Buttons */}
+            <div className="flex flex-wrap items-center gap-3.5 pt-2">
+              <Link
+                to="/shop-all"
+                className="px-7 py-3.5 sm:px-8 sm:py-4 bg-[#4f378a] hover:bg-[#3d2a6e] text-white font-heading font-bold text-sm sm:text-base rounded-full shadow-[0_10px_30px_rgba(79,55,138,0.3)] hover:shadow-[0_14px_36px_rgba(79,55,138,0.4)] transition-all duration-300 flex items-center gap-2.5 group cursor-pointer no-underline"
+              >
+                <FiShoppingBag size={18} />
+                <span>Shop Collection</span>
+                <FiArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
+              </Link>
+
+              <Link
+                to="/shop-all?category=Accessories"
+                className="px-6 py-3.5 sm:px-7 sm:py-4 bg-white/80 hover:bg-white border border-[#1d1b20]/15 hover:border-[#4f378a] text-[#1d1b20] hover:text-[#4f378a] font-heading font-bold text-sm sm:text-base rounded-full backdrop-blur-md transition-all duration-300 shadow-xs cursor-pointer no-underline"
+              >
+                Explore Accessories
+              </Link>
+            </div>
+
+            {/* Social Proof & Rating Badge */}
+            <div className="pt-4 border-t border-[#1d1b20]/10 flex flex-wrap items-center gap-4 sm:gap-6">
+              <div className="flex items-center -space-x-2.5">
+                <img
+                  src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=120&auto=format&fit=crop"
+                  alt="Customer"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-white object-cover shadow-xs"
+                />
+                <img
+                  src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=120&auto=format&fit=crop"
+                  alt="Customer"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-white object-cover shadow-xs"
+                />
+                <img
+                  src="https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=120&auto=format&fit=crop"
+                  alt="Customer"
+                  className="w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 border-white object-cover shadow-xs"
+                />
+                <div className="w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-[#4f378a] border-2 border-white text-white font-bold text-[11px] flex items-center justify-center shadow-xs">
+                  2.5k+
+                </div>
+              </div>
+
+              <div>
+                <div className="flex items-center gap-1 text-[#f59e0b] mb-0.5">
+                  {[...Array(5)].map((_, i) => (
+                    <FiStar key={i} size={14} className="fill-[#f59e0b]" />
+                  ))}
+                  <span className="text-xs font-bold text-[#1d1b20] ml-1">4.9 / 5.0</span>
+                </div>
+                <p className="text-xs text-[#49454f] font-medium">
+                  Curated & loved by style enthusiasts worldwide
+                </p>
+              </div>
+            </div>
+          </div>
+
+          {/* RIGHT: FEATURED EDITORIAL SLIDER WITH GLASS BADGES */}
+          <div className="lg:col-span-5 relative flex justify-center items-center mt-4 lg:mt-0">
+            
+            {/* Background Glow Sphere */}
+            <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[280px] sm:w-[420px] lg:w-[480px] h-[280px] sm:h-[420px] lg:h-[480px] bg-[#4f378a]/15 blur-[90px] rounded-full -z-10 animate-pulse" />
+
+            {/* Main Image Slider Frame */}
+            <div className="relative w-full max-w-[360px] sm:max-w-[420px] lg:max-w-[440px] aspect-[4/5] rounded-[28px] sm:rounded-[36px] overflow-hidden shadow-[0_25px_60px_-15px_rgba(0,0,0,0.15)] border-4 border-white/80 bg-white">
+              
               <Swiper
                 modules={[Autoplay, Pagination, EffectFade]}
                 spaceBetween={0}
                 slidesPerView={1}
                 loop={true}
-                autoplay={{ delay: 4000, disableOnInteraction: false }}
-                pagination={{ clickable: true, dynamicBullets: true }}
+                autoplay={{ delay: 4500, disableOnInteraction: false }}
+                pagination={{ clickable: true }}
                 effect="fade"
                 fadeEffect={{ crossFade: true }}
-                className="h-full w-full [&_.swiper-pagination-bullet]:bg-white/30 [&_.swiper-pagination-bullet-active]:bg-[#4f378a] [&_.swiper-pagination-bullet-active]:w-6 [&_.swiper-pagination-bullet-active]:rounded-sm [&_.swiper-pagination-bullet]:transition-all [&_.swiper-slide-active_.slide-image]:scale-110 [&_.swiper-slide-active_.slide-content]:translate-y-0 [&_.swiper-slide-active_.slide-content]:opacity-100"
+                onSlideChange={(swiper) => setActiveIndex(swiper.realIndex)}
+                className="h-full w-full [&_.swiper-pagination-bullet]:bg-white/60 [&_.swiper-pagination-bullet-active]:bg-[#4f378a] [&_.swiper-pagination-bullet-active]:w-6 [&_.swiper-pagination-bullet-active]:rounded-full [&_.swiper-pagination-bullet]:transition-all"
               >
-                {images.map((src, index) => (
-                  <SwiperSlide key={index}>
+                {images.map((item, idx) => (
+                  <SwiperSlide key={idx}>
                     <div className="relative w-full h-full group overflow-hidden">
                       <img
-                        src={src}
-                        alt={`Fashion Model ${index + 1}`}
-                        className="slide-image absolute inset-0 h-full w-full object-cover object-top transition-transform duration-[6000ms] ease-out"
+                        src={item.src}
+                        alt={item.title}
+                        className="w-full h-full object-cover object-top transition-transform duration-[6000ms] ease-out group-hover:scale-105"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-60" />
-                      <div className="slide-content absolute bottom-4 left-3 right-3 sm:bottom-8 sm:left-5 sm:right-5 z-20 transform translate-y-4 opacity-0 transition-all duration-700 delay-300">
-                        <span className="text-[7px] xs:text-[9px] sm:text-[10px] uppercase tracking-[0.2em] text-white/60 mb-0.5 sm:mb-1 block">
-                          New Arrival
+                      {/* Gradient Shadow Overlay */}
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-transparent to-black/10" />
+
+                      {/* Content Overlay */}
+                      <div className="absolute bottom-6 left-6 right-6 text-left z-20">
+                        <span className="inline-block px-2.5 py-1 rounded-md bg-white/20 backdrop-blur-md text-[#c8b7ff] text-[10px] font-extrabold uppercase tracking-widest mb-1.5">
+                          {item.tag}
                         </span>
-                        <h3 className="text-[9px] xs:text-[11px] sm:text-sm lg:text-base font-bold text-white uppercase tracking-tight leading-tight">
-                          Summer 2026 <br /> Collection
+                        <h3 className="text-xl font-heading font-extrabold text-white leading-tight">
+                          {item.title}
                         </h3>
+                        <p className="text-sm font-semibold text-white/80 mt-0.5">
+                          {item.price}
+                        </p>
                       </div>
                     </div>
                   </SwiperSlide>
@@ -98,24 +206,36 @@ export default function Hero() {
               </Swiper>
             </div>
 
-            {/* Reflection overlay */}
-            <div className="absolute inset-0 pointer-events-none bg-gradient-to-tr from-white/5 to-transparent z-20" />
-          </div>
-
-          {/* Floating badge – only on tablet/desktop */}
-          <div className="absolute bottom-6 -right-2 lg:-right-6 bg-[#222222]/85 backdrop-blur-md px-3 py-2.5 rounded-2xl border border-white/10 shadow-2xl z-20 hidden sm:block">
-            <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-full bg-[#4f378a] flex items-center justify-center text-white shrink-0">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
+            {/* Floating Glassmorphic Quality Badge */}
+            <div className="absolute -bottom-4 -left-2 sm:left-4 lg:-left-6 bg-white/90 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/60 shadow-xl z-30 animate-float-slow hidden sm:flex items-center gap-3">
+              <div className="w-9 h-9 rounded-full bg-[#4f378a] text-white flex items-center justify-center shrink-0 shadow-sm">
+                <FiCheckCircle size={18} />
               </div>
-              <div>
-                <p className="text-[9px] text-white/50 uppercase tracking-wider leading-none mb-1">Verified</p>
-                <p className="text-xs font-bold text-white leading-none">Premium Quality</p>
+              <div className="text-left">
+                <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider leading-none mb-1">
+                  100% Certified
+                </p>
+                <p className="text-xs font-heading font-extrabold text-[#1d1b20] leading-none">
+                  Ethical & Sustainable
+                </p>
               </div>
             </div>
+
+            {/* Floating Live Product Tag Pill */}
+            <div className="absolute top-6 -right-2 sm:right-4 lg:-right-6 bg-[#1d1b20]/90 text-white backdrop-blur-md px-4 py-2.5 rounded-2xl border border-white/10 shadow-xl z-30 hidden sm:flex items-center gap-3">
+              <div className="w-2.5 h-2.5 rounded-full bg-[#34d399] animate-ping" />
+              <div className="text-left">
+                <p className="text-[10px] text-white/60 font-semibold uppercase tracking-wide leading-none mb-1">
+                  Featured Piece
+                </p>
+                <p className="text-xs font-bold text-white leading-none">
+                  {images[activeIndex]?.title}
+                </p>
+              </div>
+            </div>
+
           </div>
+
         </div>
       </div>
     </section>
