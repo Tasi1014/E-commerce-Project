@@ -38,7 +38,7 @@ export default function AdminLayout() {
   const { user, loading, logout } = useAuth();
   const navigate = useNavigate();
 
-  // Sync dark mode class with <html> element
+  // Sync dark mode class with <html> element and cleanup on unmount
   useEffect(() => {
     if (darkMode) {
       document.documentElement.classList.add("dark");
@@ -48,6 +48,12 @@ export default function AdminLayout() {
       localStorage.setItem("admin_theme", "light");
     }
   }, [darkMode]);
+
+  useEffect(() => {
+    return () => {
+      document.documentElement.classList.remove("dark");
+    };
+  }, []);
 
   // Scroll to top on route change
   useEffect(() => {
@@ -114,7 +120,11 @@ export default function AdminLayout() {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#f8fafc] dark:bg-[#131315] text-slate-900 dark:text-[#e5e1e4] font-sans transition-colors duration-200">
+    <div
+      className={`flex h-screen overflow-hidden ${
+        darkMode ? "dark bg-[#131315] text-[#e5e1e4]" : "bg-[#f8fafc] text-slate-900"
+      } font-sans transition-colors duration-200`}
+    >
       {/* ═══════════════════════════════════════════
           DESKTOP SIDEBAR (md+)
       ═══════════════════════════════════════════ */}
