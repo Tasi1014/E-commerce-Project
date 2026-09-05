@@ -24,7 +24,7 @@ export function CartProvider({ children }) {
   const [isCartLoading, setIsCartLoading] = useState(true);
 
   useEffect(() => {
-    if (user) {
+    if (user && user.role !== "admin") {
       loadCart();
     } else {
       setCart([]);

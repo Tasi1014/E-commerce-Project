@@ -28,9 +28,10 @@ import { registerSchema } from "../../Validation/auth/registerSchema";
 import FormContainer from "../../Components/form/FormContainer";
 import FormInput from "../../Components/form/FormInput";
 import FormButton from "../../Components/form/FormButton";
+import { GoogleLogin } from "@react-oauth/google";
 
 // API function (axios)
-import { registerUser } from "../../api/authApi";
+import { registerUser, googleLoginUser } from "../../api/authApi";
 import { useAuth } from "../../context/AuthContext";
 
 export default function Register() {
@@ -51,6 +52,15 @@ export default function Register() {
   });
   const { login } = useAuth();
 
+  const handleAuthSuccess = (responseData, defaultMsg) => {
+    const { token, user, message } = responseData;
+    // Auto-login globally
+    login(user, token);
+    toast.success(message || defaultMsg);
+    // Redirect to home page
+    navigate("/");
+  };
+
   const onSubmit = async (data) => {
     try {
       // Map frontend fields to backend expectations
@@ -61,23 +71,30 @@ export default function Register() {
       };
 
       const response = await registerUser(payload);
-
-      // Extract token and user from response
-      const { token, user } = response.data;
-
-      // Auto-login globally
-      login(user, token);
-
-      // Registration successful
-      toast.success(response.data.message || "Account created! Welcome to PEAK.");
-      
-      // Redirect to home page
-      navigate("/");
+      handleAuthSuccess(response.data, "Account created! Welcome to PEAK.");
     } catch (err) {
       // Handle server errors (e.g., email already exists)
       const errorMsg = err.response?.data?.message || "Something went wrong. Please try again.";
       toast.error(errorMsg);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      if (!credentialResponse.credential) {
+        toast.error("Google sign-in failed: no credential received");
+        return;
+      }
+      const response = await googleLoginUser(credentialResponse.credential);
+      handleAuthSuccess(response.data, "Welcome to PEAK!");
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || "Google Sign-In failed. Please try again.";
+      toast.error(errorMsg);
+    }
+  };
+
+  const handleGoogleError = () => {
+    toast.error("Google Sign-In failed. Please try again.");
   };
 
   return (
@@ -130,6 +147,31 @@ export default function Register() {
           />
         </div>
       </form>
+
+      {/* ── Divider ── */}
+      <div className="relative my-6">
+        <div className="absolute inset-0 flex items-center">
+          <div className="w-full border-t border-[#e6e0e9]" />
+        </div>
+        <div className="relative flex justify-center text-xs uppercase">
+          <span className="bg-white px-3 text-xs uppercase tracking-wider text-[#79747e] font-medium">
+            or
+          </span>
+        </div>
+      </div>
+
+      {/* ── Google Sign-In Button ── */}
+      <div className="flex justify-center w-full">
+        <GoogleLogin
+          onSuccess={handleGoogleSuccess}
+          onError={handleGoogleError}
+          shape="rectangular"
+          theme="outline"
+          size="large"
+          width="360"
+          text="signup_with"
+        />
+      </div>
 
       <p className="text-center text-sm text-[#49454f] mt-8 mb-0">
         Already have an account?{" "}

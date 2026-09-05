@@ -1,8 +1,12 @@
+import mongoose from 'mongoose';
 import Wishlist from '../models/Whishlist.js';
 import Product from '../models/Product.js';
 
 export const getWishlist = async (req, res) => {
   try {
+    if (req.user?.role === 'admin' || !mongoose.Types.ObjectId.isValid(req.user?.userId)) {
+      return res.json({ success: true, wishlist: { products: [] } });
+    }
     let wishlist = await Wishlist.findOne({ user: req.user.userId }).populate('products');
     if (!wishlist) {
       wishlist = await Wishlist.create({ user: req.user.userId, products: [] });

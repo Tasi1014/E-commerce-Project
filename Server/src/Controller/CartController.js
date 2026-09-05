@@ -1,9 +1,13 @@
+import mongoose from 'mongoose';
 import Cart from '../models/Cart.js';
 import Product from '../models/Product.js';
 
 // Get user's cart
 export const getCart = async (req, res) => {
   try {
+    if (req.user?.role === 'admin' || !mongoose.Types.ObjectId.isValid(req.user?.userId)) {
+      return res.json({ success: true, cart: { items: [] } });
+    }
     let cart = await Cart.findOne({ user: req.user.userId });
     if (!cart) {
       cart = await Cart.create({ user: req.user.userId, items: [] });

@@ -21,9 +21,10 @@ import { loginSchema } from "../../Validation/auth/LoginSchema";
 import FormContainer from "../../Components/form/FormContainer";
 import FormInput from "../../Components/form/FormInput";
 import FormButton from "../../Components/form/FormButton";
+import { GoogleLogin } from "@react-oauth/google";
 
 // API functions (axios)
-import { loginUser, adminLogin } from "../../api/authApi";
+import { loginUser, adminLogin, googleLoginUser } from "../../api/authApi";
 import { useAuth } from "../../context/AuthContext";
 
 export default function Login() {
@@ -44,31 +45,49 @@ export default function Login() {
     },
   });
 
+  const handleAuthSuccess = (responseData) => {
+    const { token, user, message } = responseData;
+    // Store authentication data globally
+    login(user, token);
+    toast.success(message || "Login successful");
+
+    // Redirect based on role
+    if (user.role === "admin") {
+      navigate("/admin/dashboard");
+    } else {
+      navigate("/");
+    }
+  };
+
   const onSubmit = async (data) => {
     try {
       // Choose which API endpoint to call
       const apiCall = role === "admin" ? adminLogin : loginUser;
       const response = await apiCall(data);
-
-      // Extract token and user from response
-      const { token, user } = response.data;
-
-      // Store authentication data globally
-      login(user, token);
-
-      toast.success(response.data.message || "Login successful");
-
-      // Redirect based on role
-      if (user.role === "admin") {
-        navigate("/admin/dashboard");
-      } else {
-        navigate("/");
-      }
+      handleAuthSuccess(response.data);
     } catch (err) {
       // Handle errors from the backend
       const errorMsg = err.response?.data?.message || "Invalid email or password. Please try again.";
       toast.error(errorMsg);
     }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      if (!credentialResponse.credential) {
+        toast.error("Google login failed: no credential received");
+        return;
+      }
+      const response = await googleLoginUser(credentialResponse.credential);
+      handleAuthSuccess(response.data);
+    } catch (err) {
+      const errorMsg = err.response?.data?.message || "Google Sign-In failed. Please try again.";
+      toast.error(errorMsg);
+    }
+  };
+
+  const handleGoogleError = () => {
+    toast.error("Google Sign-In failed. Please try again.");
   };
 
   // Toggle between customer and admin
@@ -132,6 +151,34 @@ export default function Login() {
           />
         </div>
       </form>
+
+      {/* ── Google Sign In (Customer only) ── */}
+      {role === "customer" && (
+        <div className="mt-6">
+          <div className="relative my-6">
+            <div className="absolute inset-0 flex items-center">
+              <div className="w-full border-t border-[#e6e0e9]" />
+            </div>
+            <div className="relative flex justify-center text-xs uppercase">
+              <span className="bg-white px-3 text-xs uppercase tracking-wider text-[#79747e] font-medium">
+                or
+              </span>
+            </div>
+          </div>
+
+          <div className="flex justify-center w-full">
+            <GoogleLogin
+              onSuccess={handleGoogleSuccess}
+              onError={handleGoogleError}
+              shape="rectangular"
+              theme="outline"
+              size="large"
+              width="360"
+              text="signin_with"
+            />
+          </div>
+        </div>
+      )}
 
       {/* ── Footer: link to Register (only for customer mode) ── */}
       {role === "customer" && (

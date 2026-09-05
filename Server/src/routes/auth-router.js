@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { register, login, adminLogin, logout } from '../Controller/AuthController.js';
+import { register, login, googleLogin, adminLogin, logout } from '../Controller/AuthController.js';
 import { authenticateToken } from '../middleware/AuthMiddleware.js';
 
 const authRouter = Router();
@@ -7,6 +7,7 @@ const authRouter = Router();
 // Public routes
 authRouter.post('/register', register);
 authRouter.post('/login', login);
+authRouter.post('/google', googleLogin);
 authRouter.post('/admin-login', adminLogin);
 authRouter.post('/logout', logout);
 

@@ -20,9 +20,9 @@ export function WishlistProvider({ children }) {
   const [isOpen, setIsOpen] = useState(false);
   const [showLoginModal, setShowLoginModal] = useState(false);
 
-  // Load wishlist from backend when user logs in
+  // Load wishlist from backend when customer logs in
   useEffect(() => {
-    if (user) {
+    if (user && user.role !== "admin") {
       loadWishlist();
     } else {
       setWishlist([]);

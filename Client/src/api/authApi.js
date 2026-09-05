@@ -13,6 +13,10 @@ export const adminLogin = (credentials) => {
   return axiosInstance.post('/auth/admin-login', credentials);
 };
 
+export const googleLoginUser = (credential) => {
+  return axiosInstance.post('/auth/google', { credential });
+};
+
 export const getCurrentUser = () => {
   return axiosInstance.get('/auth/me');
 };
