@@ -21,7 +21,6 @@ const addressSchema = new mongoose.Schema({
   addressLine1: { type: String, required: true },
   city: { type: String, required: true },
   state: { type: String, required: true },
-  // Removed: addressLine2, zipCode, country
 });
 
 const orderSchema = new mongoose.Schema(

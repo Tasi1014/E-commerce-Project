@@ -1,0 +1,209 @@
+id,intent,raw_text,clean_text
+222,general_faq,What are your customer service hours?,what are your customer service hours
+41,product_search,Do you have wireless Bluetooth speakers?,do you have wireless bluetooth speakers
+229,general_faq,What areas do you currently deliver to?,what areas do you currently deliver to
+158,order_tracking,"My tracking number isn't updating, what's going on?",my tracking number isnt updating whats going on
+143,order_tracking,"Order #e015cc4a, any update?",order e015cc4a any update
+211,general_faq,Opening hours,opening hours
+156,order_tracking,track my ordr plz,track my ordr plz
+240,general_faq,U guys deliver outside ktm?,u guys deliver outside ktm
+104,payment_information,can i pay cod,can i pay cod
+86,payment_information,Can I pay cash?,can i pay cash
+110,order_tracking,Package location,package location
+199,purchase_return,Do I need the receipt to return an item?,do i need the receipt to return an item
+33,product_search,Wat shoes u got in stock,wat shoes u got in stock
+120,order_tracking,Why hasn't my order arrived yet?,why hasnt my order arrived yet
+243,general_faq,Store open on sundays?,store open on sundays
+166,purchase_return,Product replacement,product replacement
+195,purchase_return,"This broke already, replacement?",this broke already replacement
+74,payment_information,Do you offer cash on delivery?,do you offer cash on delivery
+49,product_search,Do you have this in a bigger size?,do you have this in a bigger size
+123,order_tracking,Where is my package right now?,where is my package right now
+121,order_tracking,Can you give me an update on my shipment?,can you give me an update on my shipment
+223,general_faq,Do you have a physical store I can visit?,do you have a physical store i can visit
+79,payment_information,Could you tell me what payment methods you support?,could you tell me what payment methods you support
+214,general_faq,Delivery areas,delivery areas
+32,product_search,Any good headphones?,any good headphones
+239,general_faq,Wats ur store hours,wats ur store hours
+202,purchase_return,Can I return a gift I received?,can i return a gift i received
+131,order_tracking,Can you tell me if my parcel has left the warehouse?,can you tell me if my parcel has left the warehouse
+90,payment_information,Can i pay online,can i pay online
+15,product_search,Is this jacket available in medium?,is this jacket available in medium
+69,payment_information,What payment methods do you support?,what payment methods do you support
+65,payment_information,Payment methods,payment methods
+11,product_search,I'm looking for running shoes in size 9.,im looking for running shoes in size 9
+108,order_tracking,Track order #f7bdc831,track order f7bdc831
+182,purchase_return,"I received a broken item, what are my options?",i received a broken item what are my options
+257,general_faq,Is there a minimum order amount for free delivery?,is there a minimum order amount for free delivery
+144,order_tracking,Please check order #90bd1a7e.,please check order 90bd1a7e
+184,purchase_return,Could you explain how refunds work here?,could you explain how refunds work here
+187,purchase_return,"I think I got the wrong size, what can I do?",i think i got the wrong size what can i do
+250,general_faq,Can I visit your warehouse?,can i visit your warehouse
+37,product_search,Cheap sunglasses available?,cheap sunglasses available
+24,product_search,I'm looking for something comfortable to wear at the gym.,im looking for something comfortable to wear at the gym
+141,order_tracking,Package still on the way?,package still on the way
+155,order_tracking,where is my oder,where is my oder
+16,product_search,Do you have Adidas sneakers?,do you have adidas sneakers
+70,payment_information,Can I use my debit card to pay?,can i use my debit card to pay
+227,general_faq,Do you have a store in Pokhara?,do you have a store in pokhara
+154,order_tracking,My order has been stuck at the same status for days.,my order has been stuck at the same status for days
+137,order_tracking,Wheres my package,wheres my package
+133,order_tracking,Could you confirm if my shipment left today?,could you confirm if my shipment left today
+75,payment_information,Which payment options are available at checkout?,which payment options are available at checkout
+17,product_search,Can I see your collection of women's dresses?,can i see your collection of womens dresses
+72,payment_information,Is online payment available?,is online payment available
+45,product_search,Do you have leather wallets?,do you have leather wallets
+114,order_tracking,Has my order been shipped yet?,has my order been shipped yet
+36,product_search,U sell bags?,u sell bags
+63,payment_information,eSewa accepted?,esewa accepted
+147,order_tracking,Status update for order #b4409ee1?,status update for order b4409ee1
+59,product_search,Show me your bestselling products.,show me your bestselling products
+134,order_tracking,Any idea when my delivery will show up?,any idea when my delivery will show up
+145,order_tracking,Can you locate order #c3fa2209?,can you locate order c3fa2209
+84,payment_information,Would it be possible to pay through bank transfer?,would it be possible to pay through bank transfer
+172,purchase_return,How many days do I have to return an item?,how many days do i have to return an item
+58,product_search,"I want to buy a gift for my mother, any suggestions?",i want to buy a gift for my mother any suggestions
+146,order_tracking,Order #715e0dbf tracking please.,order 715e0dbf tracking please
+153,order_tracking,Where is my order that I placed yesterday?,where is my order that i placed yesterday
+60,payment_information,Payment options,payment options
+85,payment_information,I'm curious whether you support UPI payments.,im curious whether you support upi payments
+7,product_search,Kids shoes,kids shoes
+52,product_search,Do you have any jackets for under $100?,do you have any jackets for under 100
+94,payment_information,Can I split payment between card and cash?,can i split payment between card and cash
+3,product_search,Running shoes,running shoes
+213,general_faq,Contact number,contact number
+218,general_faq,What are your opening hours?,what are your opening hours
+216,general_faq,Nearby store,nearby store
+34,product_search,Got sneakers in size 10?,got sneakers in size 10
+127,order_tracking,Can you help me find out what's happening with my delivery?,can you help me find out whats happening with my delivery
+225,general_faq,Do you ship to other cities?,do you ship to other cities
+142,order_tracking,What's the status of order #2f88ac31?,whats the status of order 2f88ac31
+212,general_faq,Support hours,support hours
+159,order_tracking,Has my package cleared customs yet?,has my package cleared customs yet
+236,general_faq,I was wondering if you have a store near me.,i was wondering if you have a store near me
+30,product_search,Got any black Nike shoes?,got any black nike shoes
+247,general_faq,What are your holiday operating hours?,what are your holiday operating hours
+5,product_search,Winter jackets,winter jackets
+209,purchase_return,refund proccess pls,refund proccess pls
+116,order_tracking,When will my order arrive?,when will my order arrive
+210,general_faq,Store location,store location
+115,order_tracking,What is the status of order #6e585dd8?,what is the status of order 6e585dd8
+233,general_faq,Can you tell me if you deliver to Lalitpur?,can you tell me if you deliver to lalitpur
+181,purchase_return,Could you help me exchange this jacket for a bigger size?,could you help me exchange this jacket for a bigger size
+109,order_tracking,My order status,my order status
+206,purchase_return,"My order was delivered but it's the wrong product, can I return it?",my order was delivered but its the wrong product can i return it
+26,product_search,"I need a new backpack for college, what do you have?",i need a new backpack for college what do you have
+197,purchase_return,Can I get store credit instead of a refund?,can i get store credit instead of a refund
+163,purchase_return,Return this item,return this item
+164,purchase_return,Refund status,refund status
+207,purchase_return,Can I exchange an item from order #6e585dd8?,can i exchange an item from order 6e585dd8
+136,order_tracking,My order still not here,my order still not here
+234,general_faq,I'd like to know your customer service hours.,id like to know your customer service hours
+76,payment_information,Can I pay through mobile banking?,can i pay through mobile banking
+135,order_tracking,Where's my stuff?,wheres my stuff
+47,product_search,Do you sell scarves?,do you sell scarves
+193,purchase_return,"Not happy with this, refund pls",not happy with this refund pls
+20,product_search,"Hey, can you help me find some black sneakers?",hey can you help me find some black sneakers
+174,purchase_return,"I received the wrong item, can I send it back?",i received the wrong item can i send it back
+103,payment_information,do u accept esewa,do u accept esewa
+129,order_tracking,Could you look up the status of order #4b7ec990 for me?,could you look up the status of order 4b7ec990 for me
+194,purchase_return,"Wrong item sent, need refund",wrong item sent need refund
+162,purchase_return,Exchange item,exchange item
+91,payment_information,Do u accept khalti,do u accept khalti
+241,general_faq,How do i contact support,how do i contact support
+256,general_faq,Do you offer free shipping on all orders?,do you offer free shipping on all orders
+150,order_tracking,Why is my order still processing after payment?,why is my order still processing after payment
+0,product_search,Nike shoes,nike shoes
+61,payment_information,Accepted payment methods,accepted payment methods
+221,general_faq,Do you deliver outside Kathmandu?,do you deliver outside kathmandu
+99,payment_information,Is cash on delivery available for my order?,is cash on delivery available for my order
+125,order_tracking,Could you check where my package is?,could you check where my package is
+186,purchase_return,Can you guide me through the exchange process?,can you guide me through the exchange process
+201,purchase_return,What items are not eligible for return?,what items are not eligible for return
+176,purchase_return,Can I return an item without the original packaging?,can i return an item without the original packaging
+25,product_search,Do you guys carry any Nike running shoes?,do you guys carry any nike running shoes
+97,payment_information,Can I pay using a gift card?,can i pay using a gift card
+105,order_tracking,Track my order,track my order
+55,product_search,lookin for wireles headphones,lookin for wireles headphones
+167,purchase_return,Can I return this shirt?,can i return this shirt
+173,purchase_return,Can I get a replacement for a defective product?,can i get a replacement for a defective product
+244,general_faq,Hows long does shipping take,hows long does shipping take
+175,purchase_return,How do I request a refund for my order?,how do i request a refund for my order
+39,product_search,Looking for a red backpack.,looking for a red backpack
+169,purchase_return,What is your return policy?,what is your return policy
+258,general_faq,wat r ur store timings,wat r ur store timings
+82,payment_information,I'd like to know if Khalti works on your site.,id like to know if khalti works on your site
+107,order_tracking,Where's my package?,wheres my package
+251,general_faq,Do you have a live chat support option?,do you have a live chat support option
+128,order_tracking,I'm wondering why my package hasn't shown up yet.,im wondering why my package hasnt shown up yet
+231,general_faq,Could you tell me where your shop is located?,could you tell me where your shop is located
+255,general_faq,What is your general shipping policy?,what is your general shipping policy
+190,purchase_return,Wanna send this back,wanna send this back
+117,order_tracking,Can you check the status of my package?,can you check the status of my package
+96,payment_information,Do you support installment payments?,do you support installment payments
+237,general_faq,Can you tell me about your delivery charges?,can you tell me about your delivery charges
+80,payment_information,I'm wondering if cash on delivery is available.,im wondering if cash on delivery is available
+215,general_faq,Shipping charges,shipping charges
+177,purchase_return,Is there a fee for returning products?,is there a fee for returning products
+19,product_search,What colors does this t-shirt come in?,what colors does this t shirt come in
+254,general_faq,Do you deliver on weekends?,do you deliver on weekends
+235,general_faq,Could you share your contact details?,could you share your contact details
+152,order_tracking,Is my order delayed because of the weekend?,is my order delayed because of the weekend
+88,payment_information,Card payment ok?,card payment ok
+245,general_faq,Any store near me?,any store near me
+226,general_faq,What is your customer support phone number?,what is your customer support phone number
+93,payment_information,Do you accept American Express?,do you accept american express
+83,payment_information,Just checking if you take Mastercard.,just checking if you take mastercard
+204,purchase_return,I want to cancel and return my recent order.,i want to cancel and return my recent order
+1,product_search,Black hoodies,black hoodies
+18,product_search,Do you sell sunglasses?,do you sell sunglasses
+51,product_search,Can I check if you have this product in stock?,can i check if you have this product in stock
+13,product_search,Do you have any blue hoodies in stock?,do you have any blue hoodies in stock
+171,purchase_return,"The product arrived damaged, what should I do?",the product arrived damaged what should i do
+179,purchase_return,What is the process for returning a damaged product?,what is the process for returning a damaged product
+188,purchase_return,"My order arrived in bad condition, can I return it?",my order arrived in bad condition can i return it
+219,general_faq,How can I contact customer support?,how can i contact customer support
+56,product_search,any hoddies available,any hoddies available
+246,general_faq,Do you have a customer care email?,do you have a customer care email
+119,order_tracking,Has my package been dispatched?,has my package been dispatched
+180,purchase_return,I wanted to ask about returning something I bought.,i wanted to ask about returning something i bought
+43,product_search,Do you carry plus-size clothing?,do you carry plus size clothing
+205,purchase_return,Can I get a refund if my order arrives late?,can i get a refund if my order arrives late
+140,order_tracking,Any update on my delivery?,any update on my delivery
+81,payment_information,Can you let me know if I can pay by card?,can you let me know if i can pay by card
+23,product_search,Could you help me find hoodies for winter?,could you help me find hoodies for winter
+53,product_search,Do you have any shoes similar to this style?,do you have any shoes similar to this style
+78,payment_information,I wanted to know if you accept eSewa.,i wanted to know if you accept esewa
+2,product_search,Wireless headphones,wireless headphones
+168,purchase_return,How do I get a refund?,how do i get a refund
+170,purchase_return,Can I exchange this product for a different size?,can i exchange this product for a different size
+118,order_tracking,Track order #a92cf104.,track order a92cf104
+73,payment_information,Can I pay with Visa card?,can i pay with visa card
+57,product_search,What is available in your shoe collection?,what is available in your shoe collection
+48,product_search,Is this jacket back in stock?,is this jacket back in stock
+183,purchase_return,"I'm not happy with this product, can I send it back?",im not happy with this product can i send it back
+122,order_tracking,Is my order still in transit?,is my order still in transit
+89,payment_information,Cod available?,cod available
+198,purchase_return,Is it possible to exchange instead of returning?,is it possible to exchange instead of returning
+29,product_search,Any chance you have leather handbags in stock?,any chance you have leather handbags in stock
+71,payment_information,Do you accept Mastercard?,do you accept mastercard
+126,order_tracking,"Hey, I wanted to know where my order is.",hey i wanted to know where my order is
+50,product_search,Are these shoes still available in black?,are these shoes still available in black
+8,product_search,Do you have black Nike shoes?,do you have black nike shoes
+54,product_search,do you hav black nike shoes,do you hav black nike shoes
+200,purchase_return,Can I return an item bought during a sale?,can i return an item bought during a sale
+4,product_search,Men's jackets,mens jackets
+102,payment_information,Do you charge extra for card payments on orders?,do you charge extra for card payments on orders
+242,general_faq,Wats the delivery charge,wats the delivery charge
+10,product_search,Do you sell wireless headphones?,do you sell wireless headphones
+253,general_faq,How long does delivery usually take?,how long does delivery usually take
+189,purchase_return,Can i retun this,can i retun this
+46,product_search,Any beanies available?,any beanies available
+138,order_tracking,Order still not delivered?,order still not delivered
+40,product_search,Show me formal shoes for men.,show me formal shoes for men
+249,general_faq,Do you offer same-day delivery?,do you offer same day delivery
+62,payment_information,Cash on delivery?,cash on delivery
+149,order_tracking,Has my paid order been shipped?,has my paid order been shipped
+95,payment_information,Is there a payment gateway fee?,is there a payment gateway fee
+77,payment_information,Do you accept international credit cards?,do you accept international credit cards
+9,product_search,Show me available hoodies.,show me available hoodies

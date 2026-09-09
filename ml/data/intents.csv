@@ -1,0 +1,261 @@
+id,text,intent
+1,"Nike shoes",product_search
+2,"Black hoodies",product_search
+3,"Wireless headphones",product_search
+4,"Running shoes",product_search
+5,"Men's jackets",product_search
+6,"Winter jackets",product_search
+7,"Adidas sneakers",product_search
+8,"Kids shoes",product_search
+9,"Do you have black Nike shoes?",product_search
+10,"Show me available hoodies.",product_search
+11,"Do you sell wireless headphones?",product_search
+12,"I'm looking for running shoes in size 9.",product_search
+13,"Can you show me winter jackets for men?",product_search
+14,"Do you have any blue hoodies in stock?",product_search
+15,"What laptop bags do you carry?",product_search
+16,"Is this jacket available in medium?",product_search
+17,"Do you have Adidas sneakers?",product_search
+18,"Can I see your collection of women's dresses?",product_search
+19,"Do you sell sunglasses?",product_search
+20,"What colors does this t-shirt come in?",product_search
+21,"Hey, can you help me find some black sneakers?",product_search
+22,"I'm trying to find a good pair of wireless earbuds.",product_search
+23,"I was wondering if you have any waterproof jackets.",product_search
+24,"Could you help me find hoodies for winter?",product_search
+25,"I'm looking for something comfortable to wear at the gym.",product_search
+26,"Do you guys carry any Nike running shoes?",product_search
+27,"I need a new backpack for college, what do you have?",product_search
+28,"Could you show me some options for formal shirts?",product_search
+29,"I'm searching for a birthday gift, maybe a watch?",product_search
+30,"Any chance you have leather handbags in stock?",product_search
+31,"Got any black Nike shoes?",product_search
+32,"U guys sell hoodies?",product_search
+33,"Any good headphones?",product_search
+34,"Wat shoes u got in stock",product_search
+35,"Got sneakers in size 10?",product_search
+36,"Any deals on jackets rn?",product_search
+37,"U sell bags?",product_search
+38,"Cheap sunglasses available?",product_search
+39,"Do you have Puma running shoes?",product_search
+40,"Looking for a red backpack.",product_search
+41,"Show me formal shoes for men.",product_search
+42,"Do you have wireless Bluetooth speakers?",product_search
+43,"I need a wallet, what options do you have?",product_search
+44,"Do you carry plus-size clothing?",product_search
+45,"What watches do you have?",product_search
+46,"Do you have leather wallets?",product_search
+47,"Any beanies available?",product_search
+48,"Do you sell scarves?",product_search
+49,"Is this jacket back in stock?",product_search
+50,"Do you have this in a bigger size?",product_search
+51,"Are these shoes still available in black?",product_search
+52,"Can I check if you have this product in stock?",product_search
+53,"Do you have any jackets for under $100?",product_search
+54,"Do you have any shoes similar to this style?",product_search
+55,"do you hav black nike shoes",product_search
+56,"lookin for wireles headphones",product_search
+57,"any hoddies available",product_search
+58,"What is available in your shoe collection?",product_search
+59,"I want to buy a gift for my mother, any suggestions?",product_search
+60,"Show me your bestselling products.",product_search
+61,"Payment options",payment_information
+62,"Accepted payment methods",payment_information
+63,"Cash on delivery?",payment_information
+64,"eSewa accepted?",payment_information
+65,"Card payments?",payment_information
+66,"Payment methods",payment_information
+67,"Do you accept credit cards?",payment_information
+68,"Can I pay using eSewa?",payment_information
+69,"Do you accept Khalti for payments?",payment_information
+70,"What payment methods do you support?",payment_information
+71,"Can I use my debit card to pay?",payment_information
+72,"Do you accept Mastercard?",payment_information
+73,"Is online payment available?",payment_information
+74,"Can I pay with Visa card?",payment_information
+75,"Do you offer cash on delivery?",payment_information
+76,"Which payment options are available at checkout?",payment_information
+77,"Can I pay through mobile banking?",payment_information
+78,"Do you accept international credit cards?",payment_information
+79,"I wanted to know if you accept eSewa.",payment_information
+80,"Could you tell me what payment methods you support?",payment_information
+81,"I'm wondering if cash on delivery is available.",payment_information
+82,"Can you let me know if I can pay by card?",payment_information
+83,"I'd like to know if Khalti works on your site.",payment_information
+84,"Just checking if you take Mastercard.",payment_information
+85,"Would it be possible to pay through bank transfer?",payment_information
+86,"I'm curious whether you support UPI payments.",payment_information
+87,"Can I pay cash?",payment_information
+88,"U guys take esewa?",payment_information
+89,"Card payment ok?",payment_information
+90,"Cod available?",payment_information
+91,"Can i pay online",payment_information
+92,"Do u accept khalti",payment_information
+93,"Is Fonepay supported?",payment_information
+94,"Do you accept American Express?",payment_information
+95,"Can I split payment between card and cash?",payment_information
+96,"Is there a payment gateway fee?",payment_information
+97,"Do you support installment payments?",payment_information
+98,"Can I pay using a gift card?",payment_information
+99,"Can I pay for my order using eSewa?",payment_information
+100,"Is cash on delivery available for my order?",payment_information
+101,"Can I change my payment method after placing an order?",payment_information
+102,"Will I be charged again if payment fails?",payment_information
+103,"Do you charge extra for card payments on orders?",payment_information
+104,"do u accept esewa",payment_information
+105,"can i pay cod",payment_information
+106,"Track my order",order_tracking
+107,"Order status",order_tracking
+108,"Where's my package?",order_tracking
+109,"Track order #f7bdc831",order_tracking
+110,"My order status",order_tracking
+111,"Package location",order_tracking
+112,"Order #3e33c066 status",order_tracking
+113,"Where is my order?",order_tracking
+114,"Can you tell me where my order is?",order_tracking
+115,"Has my order been shipped yet?",order_tracking
+116,"What is the status of order #6e585dd8?",order_tracking
+117,"When will my order arrive?",order_tracking
+118,"Can you check the status of my package?",order_tracking
+119,"Track order #a92cf104.",order_tracking
+120,"Has my package been dispatched?",order_tracking
+121,"Why hasn't my order arrived yet?",order_tracking
+122,"Can you give me an update on my shipment?",order_tracking
+123,"Is my order still in transit?",order_tracking
+124,"Where is my package right now?",order_tracking
+125,"Can I get tracking information for order #d10be773?",order_tracking
+126,"Could you check where my package is?",order_tracking
+127,"Hey, I wanted to know where my order is.",order_tracking
+128,"Can you help me find out what's happening with my delivery?",order_tracking
+129,"I'm wondering why my package hasn't shown up yet.",order_tracking
+130,"Could you look up the status of order #4b7ec990 for me?",order_tracking
+131,"I placed an order last week, any update on it?",order_tracking
+132,"Can you tell me if my parcel has left the warehouse?",order_tracking
+133,"I'm a bit worried, my order seems delayed.",order_tracking
+134,"Could you confirm if my shipment left today?",order_tracking
+135,"Any idea when my delivery will show up?",order_tracking
+136,"Where's my stuff?",order_tracking
+137,"My order still not here",order_tracking
+138,"Wheres my package",order_tracking
+139,"Order still not delivered?",order_tracking
+140,"Y is my order late",order_tracking
+141,"Any update on my delivery?",order_tracking
+142,"Package still on the way?",order_tracking
+143,"What's the status of order #2f88ac31?",order_tracking
+144,"Order #e015cc4a, any update?",order_tracking
+145,"Please check order #90bd1a7e.",order_tracking
+146,"Can you locate order #c3fa2209?",order_tracking
+147,"Order #715e0dbf tracking please.",order_tracking
+148,"Status update for order #b4409ee1?",order_tracking
+149,"Where is order #58aa60c7 right now?",order_tracking
+150,"Has my paid order been shipped?",order_tracking
+151,"Why is my order still processing after payment?",order_tracking
+152,"How long until my order arrives?",order_tracking
+153,"Is my order delayed because of the weekend?",order_tracking
+154,"Where is my order that I placed yesterday?",order_tracking
+155,"My order has been stuck at the same status for days.",order_tracking
+156,"where is my oder",order_tracking
+157,"track my ordr plz",order_tracking
+158,"Can I get real-time tracking for my shipment?",order_tracking
+159,"My tracking number isn't updating, what's going on?",order_tracking
+160,"Has my package cleared customs yet?",order_tracking
+161,"Return policy",purchase_return
+162,"Refund process",purchase_return
+163,"Exchange item",purchase_return
+164,"Return this item",purchase_return
+165,"Refund status",purchase_return
+166,"Return period",purchase_return
+167,"Product replacement",purchase_return
+168,"Can I return this shirt?",purchase_return
+169,"How do I get a refund?",purchase_return
+170,"What is your return policy?",purchase_return
+171,"Can I exchange this product for a different size?",purchase_return
+172,"The product arrived damaged, what should I do?",purchase_return
+173,"How many days do I have to return an item?",purchase_return
+174,"Can I get a replacement for a defective product?",purchase_return
+175,"I received the wrong item, can I send it back?",purchase_return
+176,"How do I request a refund for my order?",purchase_return
+177,"Can I return an item without the original packaging?",purchase_return
+178,"Is there a fee for returning products?",purchase_return
+179,"Can I exchange this for a different color?",purchase_return
+180,"What is the process for returning a damaged product?",purchase_return
+181,"I wanted to ask about returning something I bought.",purchase_return
+182,"Could you help me exchange this jacket for a bigger size?",purchase_return
+183,"I received a broken item, what are my options?",purchase_return
+184,"I'm not happy with this product, can I send it back?",purchase_return
+185,"Could you explain how refunds work here?",purchase_return
+186,"I'd like to return this because it doesn't fit.",purchase_return
+187,"Can you guide me through the exchange process?",purchase_return
+188,"I think I got the wrong size, what can I do?",purchase_return
+189,"My order arrived in bad condition, can I return it?",purchase_return
+190,"Can i retun this",purchase_return
+191,"Wanna send this back",purchase_return
+192,"This is defective, wat now",purchase_return
+193,"Can i swap this for another size",purchase_return
+194,"Not happy with this, refund pls",purchase_return
+195,"Wrong item sent, need refund",purchase_return
+196,"This broke already, replacement?",purchase_return
+197,"How long does a refund take to process?",purchase_return
+198,"Can I get store credit instead of a refund?",purchase_return
+199,"Is it possible to exchange instead of returning?",purchase_return
+200,"Do I need the receipt to return an item?",purchase_return
+201,"Can I return an item bought during a sale?",purchase_return
+202,"What items are not eligible for return?",purchase_return
+203,"Can I return a gift I received?",purchase_return
+204,"Can I return my order?",purchase_return
+205,"I want to cancel and return my recent order.",purchase_return
+206,"Can I get a refund if my order arrives late?",purchase_return
+207,"My order was delivered but it's the wrong product, can I return it?",purchase_return
+208,"Can I exchange an item from order #6e585dd8?",purchase_return
+209,"can i retun this item",purchase_return
+210,"refund proccess pls",purchase_return
+211,"Store location",general_faq
+212,"Opening hours",general_faq
+213,"Support hours",general_faq
+214,"Contact number",general_faq
+215,"Delivery areas",general_faq
+216,"Shipping charges",general_faq
+217,"Nearby store",general_faq
+218,"Where is your store located?",general_faq
+219,"What are your opening hours?",general_faq
+220,"How can I contact customer support?",general_faq
+221,"How long does delivery take?",general_faq
+222,"Do you deliver outside Kathmandu?",general_faq
+223,"What are your customer service hours?",general_faq
+224,"Do you have a physical store I can visit?",general_faq
+225,"What is your delivery charge?",general_faq
+226,"Do you ship to other cities?",general_faq
+227,"What is your customer support phone number?",general_faq
+228,"Do you have a store in Pokhara?",general_faq
+229,"How can I reach your support team?",general_faq
+230,"What areas do you currently deliver to?",general_faq
+231,"I wanted to know your store's opening hours.",general_faq
+232,"Could you tell me where your shop is located?",general_faq
+233,"I'm curious how long shipping usually takes.",general_faq
+234,"Can you tell me if you deliver to Lalitpur?",general_faq
+235,"I'd like to know your customer service hours.",general_faq
+236,"Could you share your contact details?",general_faq
+237,"I was wondering if you have a store near me.",general_faq
+238,"Can you tell me about your delivery charges?",general_faq
+239,"I'd like to know if you ship internationally.",general_faq
+240,"Wats ur store hours",general_faq
+241,"U guys deliver outside ktm?",general_faq
+242,"How do i contact support",general_faq
+243,"Wats the delivery charge",general_faq
+244,"Store open on sundays?",general_faq
+245,"Hows long does shipping take",general_faq
+246,"Any store near me?",general_faq
+247,"Do you have a customer care email?",general_faq
+248,"What are your holiday operating hours?",general_faq
+249,"Is there a delivery fee for orders under a certain amount?",general_faq
+250,"Do you offer same-day delivery?",general_faq
+251,"Can I visit your warehouse?",general_faq
+252,"Do you have a live chat support option?",general_faq
+253,"What cities do you currently operate in?",general_faq
+254,"How long does delivery usually take?",general_faq
+255,"Do you deliver on weekends?",general_faq
+256,"What is your general shipping policy?",general_faq
+257,"Do you offer free shipping on all orders?",general_faq
+258,"Is there a minimum order amount for free delivery?",general_faq
+259,"wat r ur store timings",general_faq
+260,"hw do i contact suport",general_faq

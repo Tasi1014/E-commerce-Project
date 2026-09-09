@@ -1,3 +1,6 @@
 node_modules/
 graphify-out/
 .env
+.venv/
+ml/src/__pycache__/
+ml/__pycache__/

@@ -1,0 +1,285 @@
+{
+  "store_information": {
+    "name": "PEAK",
+    "founded_year": 2026,
+    "business_type": "online_only",
+    "has_physical_store": false,
+    "market": "Nepal-based, ships internationally",
+    "currency": "USD",
+    "brand_philosophy": "PEAK focuses on material integrity, ethical production, and understated design. Every piece undergoes rigorous wear-testing, and we collaborate directly with family-owned mills and master artisans who preserve traditional textile craft for modern living.",
+    "product_categories": ["Men", "Women", "Accessories"]
+  },
+  "shipping": {
+    "free_shipping": {
+      "enabled": true,
+      "threshold_usd": 150
+    },
+    "domestic": {
+      "region": "Nepal",
+      "shipping_fee_usd": 9.99,
+      "delivery_time": "3-5 business days"
+    },
+    "international": {
+      "shipping_fee_usd": 19.99,
+      "delivery_time": "7-14 business days",
+      "excluded_regions": "not_specified",
+      "customs_duties_included": false,
+      "customs_note": "Customers may be responsible for customs duties, taxes, or import charges on international orders."
+    },
+    "same_day_delivery": false,
+    "weekend_delivery": "not_specified",
+    "delayed_delivery_policy": "not_specified",
+    "shipping_address_change_policy": "not_specified",
+    "undeliverable_order_policy": "not_specified"
+  },
+  "payment": {
+    "accepted_methods": ["Visa", "Mastercard", "Other major cards via Stripe", "Cash on Delivery (COD)"],
+    "not_accepted": ["eSewa", "Khalti", "Fonepay", "UPI", "mobile banking"],
+    "cod": {
+      "domestic_available": true,
+      "international_available": false
+    },
+    "card_processor": "Stripe",
+    "stores_card_details": false,
+    "currency_displayed": "USD",
+    "payment_failure_guidance": "Retry the payment, or select Cash on Delivery if eligible (domestic orders only). Contact support if the issue continues."
+  },
+  "returns": {
+    "return_window_days": 30,
+    "condition_required": "Unworn and unused, with original tags attached",
+    "non_returnable_items": ["Final sale items", "Clearance items"],
+    "return_shipping_payer": "customer",
+    "return_shipping_exception": "PEAK covers return shipping if the item arrived damaged or defective",
+    "refund_method": "original_payment_method",
+    "refund_processing_days": "5-7 business days after PEAK receives and inspects the returned item",
+    "exchange_policy": {
+      "available": true,
+      "window_days": 30,
+      "subject_to": "stock availability"
+    },
+    "damaged_or_defective_process": "Report to info@peak.com; PEAK covers return shipping and may prioritize replacement or full refund."
+  },
+  "cancellation": {
+    "allowed": true,
+    "window": "Within 24 hours of placing the order, or before the order ships, whichever comes first",
+    "guaranteed_after_shipment": false,
+    "how_to_request": "Contact info@peak.com as soon as possible"
+  },
+  "customer_support": {
+    "email": "info@peak.com",
+    "phone": "+977 9803901467",
+    "response_time": "24-48 hours",
+    "support_hours": "24/7",
+    "live_chat_available": "For real person chat, you can whatsapp in the provided phone number."
+  },
+  "faqs": [
+    {
+      "id": "faq_001",
+      "key": "what_is_peak",
+      "category": "general",
+      "question": "What is PEAK?",
+      "answer": "PEAK is an online-only e-commerce store founded in 2026, offering curated Men's, Women's, and Accessories collections built on material integrity, ethical production, and understated design.",
+      "keywords": ["what is peak", "about peak", "who are you", "what does peak sell", "tell me about peak"]
+    },
+    {
+      "id": "faq_002",
+      "key": "founding_year",
+      "category": "general",
+      "question": "When was PEAK founded?",
+      "answer": "PEAK was founded in 2026.",
+      "keywords": ["when founded", "how old is peak", "founding year", "since when"]
+    },
+    {
+      "id": "faq_003",
+      "key": "brand_philosophy",
+      "category": "general",
+      "question": "What is PEAK's brand philosophy?",
+      "answer": "PEAK was founded on the principle that true luxury is defined by material integrity, ethical production, and understated design rather than flashy logos. Every piece undergoes rigorous wear-testing, and we collaborate directly with family-owned mills and master artisans.",
+      "keywords": ["brand philosophy", "what makes peak different", "sustainability", "ethics", "quality"]
+    },
+    {
+      "id": "faq_004",
+      "key": "store_type",
+      "category": "general",
+      "question": "Do you have a physical store?",
+      "answer": "PEAK is an online-only store. We don't currently have a physical retail location.",
+      "keywords": ["physical store", "shop location", "store near me", "visit store", "brick and mortar", "where is your store", "store location", "store address", "where are you located"]
+    },
+    {
+      "id": "faq_005",
+      "key": "contact_info",
+      "category": "general",
+      "question": "How can I contact customer support?",
+      "answer": "You can reach us at info@peak.com or call +977 9803901467. We typically respond within 24-48 hours.",
+      "keywords": ["contact support", "email address", "phone number", "how to reach you", "customer care"]
+    },
+    {
+      "id": "faq_006",
+      "key": "support_response_time",
+      "category": "general",
+      "question": "How long does support take to respond?",
+      "answer": "Our support team typically responds within 24-48 hours.",
+      "keywords": ["response time", "how long to reply", "support hours", "when will you respond"]
+    },
+    {
+      "id": "faq_007",
+      "key": "free_shipping_threshold",
+      "category": "general",
+      "question": "Is shipping free?",
+      "answer": "Yes, we offer free standard worldwide shipping on all orders over $150.",
+      "keywords": ["free shipping", "shipping threshold", "minimum for free delivery", "free delivery amount"]
+    },
+    {
+      "id": "faq_008",
+      "key": "delivery_time",
+      "category": "general",
+      "question": "How long does delivery take?",
+      "answer": "Domestic orders within Nepal typically arrive within 3-5 business days. International orders typically take 7-14 business days.",
+      "keywords": ["delivery time", "shipping time", "how long delivery", "when will my package arrive", "shipping duration"]
+    },
+    {
+      "id": "faq_009",
+      "key": "shipping_cost",
+      "category": "general",
+      "question": "What is the shipping cost for orders under $150?",
+      "answer": "Orders under $150 have a flat shipping fee of $9.99 for domestic delivery within Nepal, or $19.99 for international orders.",
+      "keywords": ["shipping cost", "shipping fee", "how much is delivery", "delivery charge"]
+    },
+    {
+      "id": "faq_010",
+      "key": "international_shipping",
+      "category": "general",
+      "question": "Do you ship internationally?",
+      "answer": "Yes, PEAK ships worldwide, though a small number of regions may be restricted due to shipping limitations. Please note international orders may be subject to customs duties or import taxes.",
+      "keywords": ["ship internationally", "international delivery", "worldwide shipping", "customs", "import fees"]
+    },
+    {
+      "id": "faq_011",
+      "key": "same_day_weekend_delivery",
+      "category": "general",
+      "question": "Do you offer same-day or weekend delivery?",
+      "answer": "Same-day delivery is not currently offered. Weekend delivery availability has not been finalized — please contact support for the latest information.",
+      "keywords": ["same day delivery", "weekend delivery", "sunday delivery", "fast delivery"]
+    },
+    {
+      "id": "faq_012",
+      "key": "payment_methods",
+      "category": "payment",
+      "question": "What payment methods do you accept?",
+      "answer": "We accept credit and debit cards (Visa, Mastercard, and other major cards via Stripe) and Cash on Delivery (COD).",
+      "keywords": ["payment methods", "how to pay", "accepted payments", "can i pay with"]
+    },
+    {
+      "id": "faq_013",
+      "key": "cod_availability",
+      "category": "payment",
+      "question": "Is Cash on Delivery available?",
+      "answer": "Yes, Cash on Delivery is available for domestic orders within Nepal. It is not currently available for international orders.",
+      "keywords": ["cash on delivery", "cod", "pay cash", "cod international"]
+    },
+    {
+      "id": "faq_014",
+      "key": "currency",
+      "category": "payment",
+      "question": "What currency are prices shown in?",
+      "answer": "All prices on PEAK are listed in US Dollars (USD).",
+      "keywords": ["currency", "what currency", "usd", "price currency"]
+    },
+    {
+      "id": "faq_015",
+      "key": "payment_security",
+      "category": "payment",
+      "question": "Is my payment information secure?",
+      "answer": "Yes, all card payments are processed securely through Stripe. PEAK does not store your card details.",
+      "keywords": ["payment secure", "is it safe to pay", "card security", "stripe"]
+    },
+    {
+      "id": "faq_016",
+      "key": "payment_failure",
+      "category": "payment",
+      "question": "What should I do if my payment fails?",
+      "answer": "Please try the payment again, or select Cash on Delivery if you're eligible (domestic orders only). If the issue continues, contact us at info@peak.com.",
+      "keywords": ["payment failed", "card declined", "payment error", "transaction failed"]
+    },
+    {
+      "id": "faq_017",
+      "key": "return_policy",
+      "category": "returns",
+      "question": "What is your return policy?",
+      "answer": "Returns are accepted within 30 days of delivery. Items must be unworn and unused, with original tags still attached.",
+      "keywords": ["return policy", "how to return", "return window", "days to return"]
+    },
+    {
+      "id": "faq_018",
+      "key": "non_returnable_items",
+      "category": "returns",
+      "question": "Are all items eligible for return, such as sale items?",
+      "answer": "Final sale and clearance items are non-returnable and non-refundable. Other items can be returned within 30 days if unworn with original tags attached.",
+      "keywords": ["non returnable", "final sale", "clearance return", "items not returnable", "bought during sale", "sale item return", "sale return"]
+    },
+    {
+      "id": "faq_019",
+      "key": "return_shipping_cost",
+      "category": "returns",
+      "question": "Who pays for return shipping?",
+      "answer": "The customer is responsible for return shipping costs, unless the item arrived damaged or defective, in which case PEAK covers the return shipping.",
+      "keywords": ["return shipping cost", "who pays return", "free return shipping"]
+    },
+    {
+      "id": "faq_020",
+      "key": "refund_process",
+      "category": "returns",
+      "question": "How long does a refund take, and where is it sent?",
+      "answer": "Refunds are issued to your original payment method within 5-7 business days after we receive and inspect the returned item.",
+      "keywords": ["refund time", "how long refund", "where is my refund", "refund method"]
+    },
+    {
+      "id": "faq_021",
+      "key": "exchange_policy",
+      "category": "returns",
+      "question": "Can I exchange an item for a different size or color?",
+      "answer": "Yes, exchanges for a different size or color are available within the 30-day return window, subject to stock availability.",
+      "keywords": ["exchange item", "change size", "change color", "swap product"]
+    },
+    {
+      "id": "faq_022",
+      "key": "damaged_defective_items",
+      "category": "returns",
+      "question": "What if my item arrives damaged or defective?",
+      "answer": "Please contact us at info@peak.com. PEAK covers the return shipping and will prioritize a replacement or full refund for damaged or defective items.",
+      "keywords": ["damaged item", "defective product", "broken item", "wrong item received", "wrong item sent"]
+    },
+    {
+      "id": "faq_023",
+      "key": "order_cancellation",
+      "category": "general",
+      "question": "Can I cancel my order?",
+      "answer": "Orders can be cancelled within 24 hours of placing them, or before the order has shipped, whichever comes first. Please contact info@peak.com as soon as possible. Cancellation cannot be guaranteed once an order has shipped.",
+      "keywords": ["cancel order", "cancel my purchase", "stop order", "cancellation window"]
+    },
+    {
+      "id": "faq_024",
+      "key": "not_accepted_payment",
+      "category": "payment",
+      "question": "Do you accept eSewa, Khalti, Fonepay, UPI, or mobile banking?",
+      "answer": "No, PEAK does not accept eSewa, Khalti, Fonepay, UPI, or mobile banking. We only accept credit and debit cards (Visa, Mastercard, and other major cards via Stripe) and Cash on Delivery (domestic orders within Nepal).",
+      "keywords": ["esewa", "khalti", "fonepay", "upi", "mobile banking", "bank transfer", "take esewa", "accept esewa", "u guys take esewa"]
+    },
+    {
+      "id": "faq_025",
+      "key": "store_hours",
+      "category": "general",
+      "question": "What are your store hours?",
+      "answer": "PEAK is an online-only store, so our website is open for shopping 24/7. Our customer support team is available 24/7 and typically responds to inquiries within 24-48 hours.",
+      "keywords": ["store hours", "opening hours", "operating hours", "when do you open", "closing time", "store opening hours"]
+    },
+    {
+      "id": "faq_026",
+      "key": "condition_required",
+      "category": "returns",
+      "question": "Can I return or get a refund if the tag has been removed or the item was worn?",
+      "answer": "No. Items must be unworn and unused, with original tags still attached to be eligible for a return or refund. Items with tags removed cannot be returned or refunded.",
+      "keywords": ["tag removed", "removed tag", "without tag", "no tag", "tag is removed", "cut tag", "removed the tag", "accidently removed the tag", "unworn", "tags attached"]
+    }
+  ]
+}
