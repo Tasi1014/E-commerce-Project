@@ -23,7 +23,7 @@ from ml.src.chatbot import Chatbot
 logger = logging.getLogger("peak_chatbot_api")
 
 
-# ---------------------------------------------------------------------------
+# ----------------------git rm -r --cached ml\api\__pycache__ ml\src\tools\__pycache__-----------------------------------------------------
 # Session Management
 # ---------------------------------------------------------------------------
 
@@ -73,6 +73,10 @@ class SessionManager:
 class ChatRequest(BaseModel):
     message: str = Field(..., description="User message to the chatbot")
     session_id: Optional[str] = Field(default=None, description="Optional conversation session ID")
+    user_id: Optional[str] = Field(
+        default=None,
+        description="Authenticated customer ID from Node.js"
+    )
 
     @field_validator("message")
     @classmethod
@@ -84,6 +88,14 @@ class ChatRequest(BaseModel):
     @field_validator("session_id")
     @classmethod
     def validate_session_id(cls, v: Optional[str]) -> Optional[str]:
+        if v is not None:
+            v_stripped = v.strip()
+            return v_stripped if v_stripped else None
+        return v
+
+    @field_validator("user_id")
+    @classmethod
+    def validate_user_id(cls, v: Optional[str]) -> Optional[str]:
         if v is not None:
             v_stripped = v.strip()
             return v_stripped if v_stripped else None
@@ -203,7 +215,8 @@ def chat(request: ChatRequest) -> ChatResponse:
         )
 
     session_id, bot = _session_manager.get_or_create(request.session_id)
-    reply = bot.process(request.message)
+    logger.info(f"Authenticated user ID received: {request.user_id}")
+    reply = bot.process(request.message, user_id=request.user_id)
 
     return ChatResponse(
         reply=reply,

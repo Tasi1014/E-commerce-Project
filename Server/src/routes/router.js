@@ -6,6 +6,7 @@ import wishlistRouter from './wishlist-router.js';
 import orderRouter from './order-router.js';
 import adminRouter from './admin-routes.js';
 import paymentRouter from './payment-router.js';
+import aiRouter from './ai-router.js';
 
 const router = Router();
 
@@ -16,6 +17,8 @@ router.use('/wishlist', wishlistRouter);
 router.use('/orders', orderRouter);
 router.use('/admin', adminRouter);
 router.use('/payment', paymentRouter);
+router.use('/ai', aiRouter);
+
 
 
 export default router;

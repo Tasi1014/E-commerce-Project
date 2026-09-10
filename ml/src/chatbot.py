@@ -368,7 +368,7 @@ class Chatbot:
         child.model_status = self.model_status
         return child
 
-    def process(self, user_message: str) -> str:
+    def process(self, user_message: str, user_id = None) -> str:
         """
         Process a user message and return the chatbot's response.
         Thread-safe and independent of console I/O.
