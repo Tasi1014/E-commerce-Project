@@ -1,17 +1,17 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
 const orderItemSchema = new mongoose.Schema({
   productId: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Product',
+    ref: "Product",
     required: true,
   },
   name: { type: String, required: true },
   price: { type: Number, required: true },
   quantity: { type: Number, required: true, min: 1 },
   image: { type: String, required: true },
-  color: { type: String, default: '' },
-  size: { type: String, default: '' },
+  color: { type: String, default: "" },
+  size: { type: String, default: "" },
 });
 
 const addressSchema = new mongoose.Schema({
@@ -27,8 +27,13 @@ const orderSchema = new mongoose.Schema(
   {
     user: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: "User",
       required: true,
+    },
+    orderNumber: {
+      type: String,
+      unique: true,
+      index: true,
     },
     items: [orderItemSchema],
     shippingAddress: addressSchema,
@@ -38,27 +43,27 @@ const orderSchema = new mongoose.Schema(
     },
     paymentMethod: {
       type: String,
-      enum: ['COD', 'Stripe'],
+      enum: ["COD", "Stripe"],
       required: true,
     },
     paymentStatus: {
       type: String,
-      enum: ['Pending', 'Paid', 'Failed'],
-      default: 'Pending',
+      enum: ["Pending", "Paid", "Failed"],
+      default: "Pending",
     },
     orderStatus: {
       type: String,
-      enum: ['Pending', 'Processing', 'Delivered', 'Cancelled'],
-      default: 'Pending',
+      enum: ["Pending", "Processing", "Delivered", "Cancelled"],
+      default: "Pending",
     },
     subtotal: { type: Number, required: true },
     shippingCost: { type: Number, default: 0 },
     totalAmount: { type: Number, required: true },
-    notes: { type: String, default: '' },
+    notes: { type: String, default: "" },
     // Stripe idempotency key – prevents duplicate orders on repeated webhook/page calls
     stripeSessionId: { type: String, default: null, sparse: true },
   },
-  { timestamps: true }
+  { timestamps: true },
 );
 
-export default mongoose.model('Order', orderSchema);
+export default mongoose.model("Order", orderSchema);

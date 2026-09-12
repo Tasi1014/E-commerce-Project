@@ -1,66 +1,39 @@
-﻿"""
-chatbot.py - Main Conversational Orchestration Layer & Terminal Interface for PEAK.
+﻿# ml/src/chatbot.py
 
-Orchestrates:
-1. Knowledge base loading & validation
-2. Bounded conversation history & context tracking
-3. Dynamic intent & topic classification (reusable Ollama client)
-4. Safe guardrails for out-of-scope requests
-5. Phase 2 placeholder routing for product_search & order_tracking
-6. OPTIONAL Response Generation:
-   - Direct authoritative answer for simple FAQ queries (1 LLM call)
-   - Synthesis via ResponseGenerator only when query is compound / conversational
-7. Asynchronous background model warm-up with keep_alive="60m"
-8. Decoupled design: chatbot.process() has zero dependency on input() or print()
-"""
-
+import copy
 import logging
-import os
 import re
-import sys
 import threading
-import time
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional
 
-import ollama
-
-from .tools.faq import KnowledgeBase, get_knowledge_base
-from .classifier import IntentClassifier, ClassificationResult, pre_filter
+from .classifier import IntentClassifier, ClassificationResult
 from .response_generator import ResponseGenerator
+from .tools.faq import KnowledgeBase
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
-    handlers=[logging.StreamHandler(sys.stderr)],
-)
-logger = logging.getLogger("peak_chatbot")
-logging.getLogger("httpx").setLevel(logging.WARNING)
 
-# Model readiness states
-MODEL_LOADING = "MODEL_LOADING"
-MODEL_READY = "MODEL_READY"
-MODEL_ERROR = "MODEL_ERROR"
+logger = logging.getLogger(__name__)
 
-# Guardrail and canned responses
+
+# ---------------------------------------------------------------------------
+# Responses
+# ---------------------------------------------------------------------------
+
 OUT_OF_SCOPE_RESPONSE = (
     "I'm here to help with PEAK's products, orders, payments, returns, "
     "and store information. I can't help with that request."
 )
 
-PHASE2_PRODUCT_SEARCH_RESPONSE = (
-    "I can help you find products, but live product search is not connected yet."
-)
-
-PHASE2_ORDER_TRACKING_RESPONSE = (
-    "I can help with order tracking, but live order tracking is not connected yet."
-)
-
 SOCIAL_RESPONSES = {
     "greeting": "Hello! Welcome to PEAK. How can I help you today?",
-    "gratitude": "You're very welcome! Please let me know if you have any other questions.",
-    "farewell": "Goodbye! Thank you for shopping with PEAK. Have a wonderful day!",
-    "affirmation": "Understood! Let me know if there's anything else I can assist you with.",
+    "gratitude": (
+        "You're very welcome! Please let me know if you have any other questions."
+    ),
+    "farewell": (
+        "Goodbye! Thank you for shopping with PEAK. Have a wonderful day!"
+    ),
+    "affirmation": (
+        "Understood! Let me know if there's anything else I can assist you with."
+    ),
 }
 
 UNKNOWN_POLICY_RESPONSE = (
@@ -70,533 +43,715 @@ UNKNOWN_POLICY_RESPONSE = (
 )
 
 
-def is_contextual_followup(query: str, previous_intent: Optional[str]) -> bool:
-    """
-    Detects if the query is an elliptical or conversational follow-up to the previous turn.
-    """
-    if not previous_intent:
-        return False
-    clean = query.strip().lower()
+# ---------------------------------------------------------------------------
+# Intent groups
+# ---------------------------------------------------------------------------
 
-    # Direct follow-up phrases
-    if re.match(r"^(yes\s+or\s+no\??|why\??|why\s+not\??|and\s+.*|only\s+.*|what\s+about\s+.*|what\s+if\s*.*\??)$", clean):
-        return True
+LIVE_DATA_INTENTS = {
+    "product_search",
+    "order_tracking",
+}
 
-    # Short dependent queries (<= 5 words starting with linking or interrogative words)
-    words = clean.split()
-    if len(words) <= 5 and words[0] in ("only", "what", "how", "and", "is", "can", "will", "yes", "no", "internationally?", "internationally"):
-        return True
-
-    return False
-
-
-def resolve_contextual_followup(
-    query: str,
-    previous_intent: Optional[str],
-    previous_topic: Optional[str],
-    kb: KnowledgeBase,
-) -> Optional[Tuple[str, Optional[str]]]:
-    """
-    Priority 2: Resolve conversation context first.
-    Detects if the query is an elliptical or contextual follow-up to an active conversation turn.
-    Determines if it inherits the previous topic, shifts to a specific subtopic within the domain,
-    or confirms a binary answer (yes/no).
-    Returns (intent, topic) if resolved, or None if it should be classified independently.
-    """
-    if not previous_intent:
-        return None
-
-    clean = query.strip().lower()
-    words = clean.split()
-
-    # 1. Direct polarity / binary confirmation: "yes or no?", "is that a yes or no?"
-    if re.match(r"^(yes\s+or\s+no\??|is\s+that\s+a\s+yes\s+or\s+no\??|just\s+tell\s+me\s+yes\s+or\s+no\??)$", clean):
-        return (previous_intent, previous_topic)
-
-    # 2. Check if the query is an elliptical follow-up structure
-    is_elliptical = False
-    if re.match(r"^(only\b|what\s+about\b|how\s+about\b|what\s+if\b|and\b|why\b|why\s+not\b)", clean):
-        is_elliptical = True
-    elif len(words) <= 4 and words[0] in ("internationally?", "internationally", "domestic?", "domestically"):
-        is_elliptical = True
-    elif len(words) <= 5 and words[0] in ("only", "what", "how", "and", "is", "can", "will", "why"):
-        is_elliptical = True
-
-    if not is_elliptical:
-        return None
-
-    # 3. Check if the follow-up introduces a domain-specific subtopic keyword
-    if previous_intent == "purchase_return":
-        if re.search(r"\b(tag|tags|unworn|worn|opened|wash|washed|used|condition)\b", clean):
-            return ("purchase_return", "condition_required")
-        if re.search(r"\b(sale|clearance|final\s+sale|discount|discounted)\b", clean):
-            return ("purchase_return", "non_returnable_items")
-        if re.search(r"\b(broken|damaged|defective|faulty|wrong)\b", clean):
-            return ("purchase_return", "damaged_defective_items")
-        if re.search(r"\b(refund|refunds|money\s+back)\b", clean):
-            return ("purchase_return", "refund_timing" if "refund_timing" in kb.faqs_by_key else "return_policy")
-        if re.search(r"\b(exchange|exchanges|replace|replacement)\b", clean):
-            return ("purchase_return", "exchange_policy")
-
-    # In general, if query matches known keywords within the previous domain:
-    cat = kb.INTENT_TO_CATEGORY.get(previous_intent)
-    if cat:
-        matched_faq = kb.find_faq_by_keywords(clean, category=cat)
-        if matched_faq and matched_faq.get("key") != previous_topic:
-            return (previous_intent, matched_faq.get("key"))
-
-    # 4. Pure elliptical qualifiers / continuations on the SAME topic:
-    # e.g., "Only for inside Nepal?", "What about internationally?", "only Nepal?", "what if?", "why?"
-    if previous_topic:
-        return (previous_intent, previous_topic)
-
-    return (previous_intent, None)
-
-
-def should_use_response_generator(
-    query: str,
-    is_followup: bool,
-    context: Optional[Dict[str, Any]] = None,
-) -> bool:
-    """
-    Determines whether a query requires ResponseGenerator synthesis or direct KB answer.
-
-    Direct KB answer when:
-    - Standalone single question that maps directly to one authoritative KB fact.
-    - No contextual follow-up or interpretation needed.
-
-    ResponseGenerator when:
-    - Multiple KB facts must be combined.
-    - Contextual follow-up to a previous turn.
-    - Conditional question ("if", "what if", "suppose", "accidentally").
-    - Explicit yes/no confirmation question ("yes or no?", "is it refundable?").
-    - Adapting a policy to the user's specific scenario.
-    """
-    clean = query.strip().lower()
-
-    # 1. Any contextual follow-up to a previous turn needs conversational tailoring
-    if is_followup:
-        return True
-
-    # 2. Multi-question indicators
-    if clean.count("?") > 1:
-        return True
-
-    # 3. Explicit yes/no or confirmation inquiries
-    if re.search(r"\b(yes\s+or\s+no|is\s+.*\b(refundable|returnable|allowed|possible|eligible)|can\s+i\s+still|will\s+it\s+be\s+refunded)\b", clean):
-        return True
-
-    # 4. Conditional or scenario inquiries
-    if re.search(r"\b(if\b|what\s+if|suppose|in\s+case|accidentally|tag.*(removed|missing|cut)|(removed|missing|cut).*tag)\b", clean):
-        return True
-
-    # 5. Compound / comparison indicators
-    compound_patterns = [
-        r"\b(options?|what\s+should\s+i\s+do|what\s+can\s+i\s+do)\b",
-        r"\b(and\s+(how|what|can|do|is|will|where)|also\b|plus\b)",
-        r"\b(i\s+(bought|ordered|received)).*\b(but|however|damaged|broken|wrong|defective)\b",
-        r"\b(both|either|difference\s+between)\b",
-        r"\b(as\s+well\s+as|in\s+addition)\b",
-    ]
-    return any(re.search(pat, clean) for pat in compound_patterns)
+KB_INTENTS = {
+    "payment_information",
+    "purchase_return",
+    "general_faq",
+}
 
 
 class Chatbot:
-    """
-    Core conversational customer support engine for PEAK.
-    Completely decoupled from I/O (no print() or input()).
-    """
 
     def __init__(
         self,
-        kb_path: Optional[str] = None,
-        model_name: str = "gemma3:4b",
-        keep_alive: str = "60m",
-        max_history_turns: int = 6,
-        client=None,
-        classifier=None,
-        response_generator=None,
+        classifier: Optional[IntentClassifier] = None,
+        response_generator: Optional[ResponseGenerator] = None,
+        knowledge_base: Optional[KnowledgeBase] = None,
     ):
-        self.model_name = model_name
-        self.keep_alive = keep_alive
-        self.max_history_turns = max_history_turns
+        self.classifier = classifier or IntentClassifier()
+        self.response_generator = response_generator or ResponseGenerator()
+        self.kb = knowledge_base or KnowledgeBase()
 
-        # Shared Ollama client instance for connection reuse
-        self.client = client or ollama.Client()
-
-        # Initialize knowledge base
-        self.kb = KnowledgeBase.get_instance(kb_path)
-
-        # Initialize subcomponents with shared client
-        self.classifier = classifier or IntentClassifier(
-            kb=self.kb,
-            model_name=self.model_name,
-            keep_alive=self.keep_alive,
-            client=self.client,
-        )
-        self.response_generator = response_generator or ResponseGenerator(
-            model_name=self.model_name,
-            keep_alive=self.keep_alive,
-            client=self.client,
-        )
-
-        # Bounded conversation state
-        self.history: List[Dict[str, str]] = []
-        self.previous_intent: Optional[str] = None
-        self.previous_topic: Optional[str] = None
-        self.last_user_message: Optional[str] = None
-        self.last_bot_message: Optional[str] = None
-
-        # Model readiness state
-        self._warmup_event = threading.Event()
-        self._warmup_thread: Optional[threading.Thread] = None
-
-        if self.check_model_resident():
-            self.model_status: str = MODEL_READY
-            self._warmup_event.set()
-        else:
-            self.model_status: str = MODEL_LOADING
-
-        # Latency instrumentation
-        self.last_timing: Dict[str, float] = {
-            "classification_ms": 0.0,
-            "retrieval_ms": 0.0,
-            "response_gen_ms": 0.0,
-            "total_ms": 0.0,
-            "llm_calls": 0,
+        self._conversation_state = {
+            "previous_intent": None,
+            "previous_topic": None,
+            "waiting_for": None,
         }
 
-    def check_model_resident(self) -> bool:
-        """
-        Checks Ollama's active models via client.ps().
-        Returns True if the model is currently resident in memory.
-        """
-        try:
-            ps_result = self.client.ps()
-            active_models = getattr(ps_result, "models", [])
-            for m in active_models:
-                m_name = getattr(m, "name", getattr(m, "model", ""))
-                if self.model_name in m_name:
-                    return True
-        except Exception as e:
-            logger.debug(f"Unable to query client.ps(): {e}")
-        return False
+        self._warmup_lock = threading.Lock()
+        self._warmed_up = False
 
-    def start_background_warmup(self) -> None:
-        """Starts background model warm-up only if not already resident in memory."""
-        if self.model_status == MODEL_READY or self.check_model_resident():
-            self.model_status = MODEL_READY
-            self._warmup_event.set()
-            return
+        logger.info("Chatbot initialized successfully.")
 
-        if self._warmup_thread and self._warmup_thread.is_alive():
-            return
-
-        self._warmup_thread = threading.Thread(
-            target=self._run_warmup,
-            name="OllamaWarmupThread",
-            daemon=True,
-        )
-        self._warmup_thread.start()
-
-    def _run_warmup(self) -> None:
-        """
-        Executes minimal warm-up query to load Gemma 3 4B into memory/VRAM.
-        num_predict=1 prevents wasting time generating tokens.
-        num_ctx=2048 matches the context window used by classifier and response generator.
-        """
-        logger.info(f"Initiating background warm-up for {self.model_name}...")
-        start_time = time.time()
-        try:
-            self.client.chat(
-                model=self.model_name,
-                messages=[{"role": "user", "content": "ping"}],
-                options={"temperature": 0.0, "num_predict": 1, "num_ctx": 2048},
-                keep_alive=self.keep_alive,
-            )
-            elapsed = time.time() - start_time
-            self.model_status = MODEL_READY
-            logger.info(f"Model {self.model_name} loaded and ready (took {elapsed:.2f}s).")
-        except Exception as e:
-            self.model_status = MODEL_ERROR
-            logger.warning(f"Model warm-up encountered an error: {e}")
-        finally:
-            self._warmup_event.set()
-
-    def is_ready(self) -> bool:
-        """Returns True if the background warm-up has completed successfully."""
-        return self.model_status == MODEL_READY
-
-    def wait_until_ready(self, timeout: float = 300.0) -> bool:
-        """Waits for warm-up to finish if called while warming up."""
-        self._warmup_event.wait(timeout=timeout)
-        return self.model_status == MODEL_READY
-
-    def get_context(self) -> Dict[str, Any]:
-        """Returns current conversation context for intent understanding and response generation."""
-        return {
-            "previous_intent": self.previous_intent,
-            "previous_topic": self.previous_topic,
-            "last_user_message": self.last_user_message,
-            "last_bot_message": self.last_bot_message,
-        }
-
-    def reset(self) -> None:
-        """Resets conversation state and history."""
-        self.history.clear()
-        self.previous_intent = None
-        self.previous_topic = None
-        self.last_user_message = None
-        self.last_bot_message = None
+    # -----------------------------------------------------------------------
+    # Session handling
+    # -----------------------------------------------------------------------
 
     def create_session_instance(self) -> "Chatbot":
-        """
-        Creates an isolated session-specific Chatbot instance that shares
-        the heavy Ollama client, classifier, response generator, and KB singleton,
-        while maintaining independent conversation history and context.
-        """
-        child = Chatbot(
-            kb_path=str(self.kb.kb_path),
-            model_name=self.model_name,
-            keep_alive=self.keep_alive,
-            max_history_turns=self.max_history_turns,
-            client=self.client,
+        """Create an independent chatbot session."""
+
+        session_bot = Chatbot(
             classifier=self.classifier,
             response_generator=self.response_generator,
+            knowledge_base=self.kb,
         )
-        child._warmup_event = self._warmup_event
-        child.model_status = self.model_status
-        return child
 
-    def process(self, user_message: str, user_id = None) -> str:
-        """
-        Process a user message and return the chatbot's response.
-        Thread-safe and independent of console I/O.
-        """
-        t_start = time.perf_counter()
-        cleaned_query = user_message.strip()
+        session_bot._conversation_state = copy.deepcopy(
+            self._conversation_state
+        )
 
-        # Reset timing stats
-        self.last_timing = {
-            "classification_ms": 0.0,
-            "retrieval_ms": 0.0,
-            "response_gen_ms": 0.0,
-            "total_ms": 0.0,
-            "llm_calls": 0,
+        session_bot._warmed_up = self._warmed_up
+
+        return session_bot
+
+    def reset(self) -> None:
+        """Reset conversation state."""
+
+        self._conversation_state = {
+            "previous_intent": None,
+            "previous_topic": None,
+            "waiting_for": None,
         }
 
-        if not cleaned_query:
-            return "Please enter a question or message so I can assist you."
+    # -----------------------------------------------------------------------
+    # Warm-up
+    # -----------------------------------------------------------------------
 
-        # If background warm-up is still active, wait for it
-        if self.model_status == MODEL_LOADING and self._warmup_thread and self._warmup_thread.is_alive():
-            self._warmup_event.wait(timeout=300.0)
+    def warm_up(self) -> None:
+        """Warm up both LLM components."""
 
-        # Priority 1: Deterministic greetings / social handling (0 LLM calls)
-        pre_result = pre_filter(cleaned_query)
-        if pre_result and pre_result.social_type:
-            response = SOCIAL_RESPONSES.get(
-                pre_result.social_type,
-                SOCIAL_RESPONSES["greeting"],
-            )
-            self._update_state(cleaned_query, response, pre_result.intent, None)
-            self.last_timing["total_ms"] = (time.perf_counter() - t_start) * 1000.0
-            self.last_timing["llm_calls"] = 0
-            return response
+        with self._warmup_lock:
+            if self._warmed_up:
+                return
 
-        # Priority 2: Resolve conversation context first
-        is_followup = is_contextual_followup(cleaned_query, self.previous_intent)
-        resolved_context = resolve_contextual_followup(
-            cleaned_query,
-            self.previous_intent,
-            self.previous_topic,
-            self.kb,
-        )
+            if hasattr(self.classifier, "warm_up"):
+                self.classifier.warm_up()
 
-        if resolved_context is not None:
-            resolved_intent, resolved_topic = resolved_context
-            classification = ClassificationResult(
-                intent=resolved_intent,
-                topic=resolved_topic,
-            )
-            is_followup = True
-            self.last_timing["classification_ms"] = 0.0
-        else:
-            # Priority 3: Classify intent + topic with descriptive topic glosses
-            context = self.get_context()
-            t_clf_start = time.perf_counter()
-            classification = self.classifier.classify(
-                cleaned_query,
-                context=context,
-            )
-            self.last_timing["classification_ms"] = (time.perf_counter() - t_clf_start) * 1000.0
-            self.last_timing["llm_calls"] = 1
+            if hasattr(self.response_generator, "warm_up"):
+                self.response_generator.warm_up()
 
-            if classification.social_type:
-                response = SOCIAL_RESPONSES.get(
-                    classification.social_type,
-                    SOCIAL_RESPONSES["greeting"],
-                )
-                self._update_state(cleaned_query, response, classification.intent, None)
-                self.last_timing["total_ms"] = (time.perf_counter() - t_start) * 1000.0
-                self.last_timing["llm_calls"] = 0
-                return response
+            self._warmed_up = True
 
-        # 3. Step: Route based on intent
-        intent = classification.intent
-        topic = classification.topic
+            logger.info("Chatbot warm-up completed.")
 
-        if intent == "out_of_scope":
-            response = OUT_OF_SCOPE_RESPONSE
-            self._update_state(cleaned_query, response, intent, None)
-            self.last_timing["total_ms"] = (time.perf_counter() - t_start) * 1000.0
-            return response
+    # -----------------------------------------------------------------------
+    # Context
+    # -----------------------------------------------------------------------
 
-        elif intent == "product_search":
-            response = PHASE2_PRODUCT_SEARCH_RESPONSE
-            self._update_state(cleaned_query, response, intent, None)
-            self.last_timing["total_ms"] = (time.perf_counter() - t_start) * 1000.0
-            return response
+    def _get_context(self) -> Dict[str, Any]:
+        return {
+            "previous_intent": self._conversation_state["previous_intent"],
+            "previous_topic": self._conversation_state["previous_topic"],
+            "waiting_for": self._conversation_state["waiting_for"],
+        }
 
-        elif intent == "order_tracking":
-            response = PHASE2_ORDER_TRACKING_RESPONSE
-            self._update_state(cleaned_query, response, intent, None)
-            self.last_timing["total_ms"] = (time.perf_counter() - t_start) * 1000.0
-            return response
-
-        elif intent in ("general_faq", "payment_information", "purchase_return"):
-            t_ret_start = time.perf_counter()
-            faq_record = None
-            if topic:
-                faq_record = self.kb.get_faq(topic)
-
-            # Safety-net keyword matching if topic lookup failed
-            if not faq_record:
-                category = self.kb.INTENT_TO_CATEGORY.get(intent)
-                faq_record = self.kb.find_faq_by_keywords(cleaned_query, category=category)
-                if not faq_record:
-                    faq_record = self.kb.find_faq_by_keywords(cleaned_query)
-
-            self.last_timing["retrieval_ms"] = (time.perf_counter() - t_ret_start) * 1000.0
-
-            if not faq_record:
-                response = UNKNOWN_POLICY_RESPONSE
-                self._update_state(cleaned_query, response, intent, None)
-                self.last_timing["total_ms"] = (time.perf_counter() - t_start) * 1000.0
-                return response
-
-            resolved_topic = faq_record.get("key")
-            raw_answer = faq_record.get("answer", "")
-
-            # DECISION MECHANISM: Direct Answer vs Response Generator
-            context = self.get_context()
-            needs_synthesis = should_use_response_generator(cleaned_query, is_followup, context)
-
-            if not needs_synthesis and raw_answer:
-                # Direct authoritative answer: 1 LLM call total, 0 hallucination
-                response = raw_answer
-                self.last_timing["response_gen_ms"] = 0.0
-            else:
-                # Conversational / compound synthesis: 2nd LLM call
-                t_gen_start = time.perf_counter()
-                facts = self.kb.get_context_for_faq(faq_record)
-
-                synth_query = cleaned_query
-                if is_followup and self.last_user_message and len(cleaned_query.split()) <= 7:
-                    synth_query = f"{self.last_user_message} -> {cleaned_query}"
-
-                response = self.response_generator.generate(
-                    user_query=synth_query,
-                    retrieved_facts=facts,
-                    context=context,
-                )
-                self.last_timing["response_gen_ms"] = (time.perf_counter() - t_gen_start) * 1000.0
-                self.last_timing["llm_calls"] += 1
-
-            self._update_state(cleaned_query, response, intent, resolved_topic)
-            self.last_timing["total_ms"] = (time.perf_counter() - t_start) * 1000.0
-            return response
-
-        else:
-            # Fallback for unexpected intent
-            response = OUT_OF_SCOPE_RESPONSE
-            self._update_state(cleaned_query, response, "out_of_scope", None)
-            self.last_timing["total_ms"] = (time.perf_counter() - t_start) * 1000.0
-            return response
-
-    def _update_state(
+    def _update_context(
         self,
-        user_message: str,
-        bot_response: str,
         intent: Optional[str],
         topic: Optional[str],
+        waiting_for: Optional[str] = None,
     ) -> None:
-        """Updates bounded conversation history and state."""
-        self.previous_intent = intent
-        self.previous_topic = topic
-        self.last_user_message = user_message
-        self.last_bot_message = bot_response
+        self._conversation_state["previous_intent"] = intent
+        self._conversation_state["previous_topic"] = topic
+        self._conversation_state["waiting_for"] = waiting_for
 
-        self.history.append({"role": "user", "content": user_message})
-        self.history.append({"role": "assistant", "content": bot_response})
+    # -----------------------------------------------------------------------
+    # Social pre-filter
+    # -----------------------------------------------------------------------
 
-        # Keep history bounded
-        if len(self.history) > self.max_history_turns * 2:
-            self.history = self.history[-(self.max_history_turns * 2):]
+    def _pre_filter(self, message: str) -> Optional[str]:
+        """Handle simple social messages without using the LLM."""
 
+        normalized = message.strip().lower()
 
-def main():
-    """Terminal Interface for PEAK AI Customer Support."""
-    # Ensure UTF-8 output encoding for Windows consoles
-    if sys.stdout.encoding.lower() != "utf-8":
+        greetings = {
+            "hi",
+            "hello",
+            "hey",
+            "hey there",
+            "hi there",
+            "good morning",
+            "good afternoon",
+            "good evening",
+        }
+
+        gratitude = {
+            "thanks",
+            "thank you",
+            "thanks!",
+            "thank you!",
+            "thx",
+            "appreciate it",
+        }
+
+        farewells = {
+            "bye",
+            "goodbye",
+            "see you",
+            "see you later",
+            "good night",
+        }
+
+        if normalized in greetings:
+            return SOCIAL_RESPONSES["greeting"]
+
+        if normalized in gratitude:
+            return SOCIAL_RESPONSES["gratitude"]
+
+        if normalized in farewells:
+            return SOCIAL_RESPONSES["farewell"]
+
+        return None
+
+    # -----------------------------------------------------------------------
+    # Contextual follow-up
+    # -----------------------------------------------------------------------
+
+    def _resolve_contextual_followup(
+        self,
+        message: str,
+    ) -> Optional[Dict[str, Any]]:
+        """
+        Resolve short follow-up messages using the existing conversation state.
+        """
+
+        previous_intent = self._conversation_state["previous_intent"]
+        previous_topic = self._conversation_state["previous_topic"]
+        waiting_for = self._conversation_state["waiting_for"]
+
+        if not previous_intent:
+            return None
+
+        message = message.strip()
+
+        if not message:
+            return None
+
+        # Previous turn requested a missing entity.
+        if waiting_for:
+            entities = {}
+
+            if waiting_for == "order_number":
+                match = re.search(
+                    r"\bPK-[0-9A-Fa-f]{8}\b",
+                    message,
+                )
+
+                if match:
+                    entities["order_number"] = match.group(0).upper()
+
+            return {
+                "intent": previous_intent,
+                "topic": previous_topic,
+                "entities": entities,
+                "social_type": None,
+                "is_prefiltered": False,
+                "is_followup": True,
+            }
+
+        # Short follow-up such as:
+        # "What about Kathmandu?"
+        # "What about COD?"
+        if len(message.split()) <= 4:
+            return {
+                "intent": previous_intent,
+                "topic": previous_topic,
+                "entities": {},
+                "social_type": None,
+                "is_prefiltered": False,
+                "is_followup": True,
+            }
+
+        return None
+
+    # -----------------------------------------------------------------------
+    # LLM CALL 1
+    # -----------------------------------------------------------------------
+
+    def classify_message(self, user_message: str) -> Dict[str, Any]:
+        """
+        Understand the customer message.
+
+        This performs:
+            - social pre-filter
+            - contextual follow-up handling
+            - LLM intent classification
+            - topic extraction
+            - entity extraction
+            - classifier-level validation/guardrails
+
+        It does NOT:
+            - query MongoDB
+            - execute ProductTool
+            - execute OrderTool
+            - generate the final response
+        """
+
+        if not isinstance(user_message, str):
+            raise TypeError("user_message must be a string")
+
+        user_message = user_message.strip()
+
+        if not user_message:
+            raise ValueError("user_message cannot be empty")
+
+        if not self._warmed_up:
+            self.warm_up()
+
+        # ---------------------------------------------------------------
+        # Social pre-filter
+        # ---------------------------------------------------------------
+
+        social_response = self._pre_filter(user_message)
+
+        if social_response:
+            social_type = None
+
+            normalized = user_message.lower()
+
+            if normalized in {
+                "hi",
+                "hello",
+                "hey",
+                "hey there",
+                "hi there",
+                "good morning",
+                "good afternoon",
+                "good evening",
+            }:
+                social_type = "greeting"
+
+            elif normalized in {
+                "thanks",
+                "thank you",
+                "thanks!",
+                "thank you!",
+                "thx",
+                "appreciate it",
+            }:
+                social_type = "gratitude"
+
+            elif normalized in {
+                "bye",
+                "goodbye",
+                "see you",
+                "see you later",
+                "good night",
+            }:
+                social_type = "farewell"
+
+            return {
+                "intent": "general_faq",
+                "topic": None,
+                "entities": {},
+                "social_type": social_type,
+                "is_prefiltered": True,
+                "is_followup": False,
+            }
+
+        # ---------------------------------------------------------------
+        # Contextual follow-up
+        # ---------------------------------------------------------------
+
+        followup = self._resolve_contextual_followup(user_message)
+
+        if followup:
+            logger.info(
+                "Contextual follow-up resolved: %s",
+                followup,
+            )
+            return followup
+
+        # ---------------------------------------------------------------
+        # LLM classification
+        # ---------------------------------------------------------------
+
+        result: ClassificationResult = self.classifier.classify(
+            user_message,
+            context=self._get_context(),
+        )
+
+        classification = {
+            "intent": result.intent,
+            "topic": result.topic,
+            "entities": result.entities or {},
+            "social_type": result.social_type,
+            "is_prefiltered": result.is_prefiltered,
+            "is_followup": False,
+        }
+
+        logger.info(
+            "Classification: intent=%s, topic=%s, entities=%s",
+            classification["intent"],
+            classification["topic"],
+            classification["entities"],
+        )
+
+        return classification
+
+    # -----------------------------------------------------------------------
+    # KB retrieval
+    # -----------------------------------------------------------------------
+
+    def retrieve_kb_facts(
+        self,
+        classification: Dict[str, Any],
+        user_message: str,
+    ) -> Dict[str, Any]:
+        """
+        Retrieve authoritative facts from knowledge_base.json.
+
+        Topic lookup is attempted first.
+        Keyword matching is the safety-net fallback already implemented
+        by faq.py.
+        """
+
+        intent = classification.get("intent")
+        topic = classification.get("topic")
+
+        if intent not in KB_INTENTS:
+            return {}
+
+        # ---------------------------------------------------------------
+        # Primary topic-based retrieval
+        # ---------------------------------------------------------------
+
+        if topic:
+            faq = self.kb.get_faq(topic)
+
+            if faq:
+                return self.kb.get_context_for_faq(faq)
+
+        # ---------------------------------------------------------------
+        # Existing keyword fallback
+        # ---------------------------------------------------------------
+
+        category = self.kb.INTENT_TO_CATEGORY.get(intent)
+
+        faq = self.kb.find_faq_by_keywords(
+            user_message,
+            category=category,
+        )
+
+        if faq:
+            logger.info(
+                "KB keyword fallback matched FAQ: %s",
+                faq.get("key"),
+            )
+
+            return self.kb.get_context_for_faq(faq)
+
+        return {}
+
+    # -----------------------------------------------------------------------
+    # LLM CALL 2
+    # -----------------------------------------------------------------------
+
+    def generate_response(
+        self,
+        user_message: str,
+        classification: Dict[str, Any],
+        tool_result: Optional[Dict[str, Any]] = None,
+    ) -> str:
+        """
+        Generate the final response.
+
+        For KB intents:
+            Python retrieves authoritative KB facts.
+
+        For live-data intents:
+            Node provides tool_result.
+
+        ResponseGenerator then turns the trusted information into the
+        final natural-language response.
+        """
+
+        intent = classification.get("intent")
+        topic = classification.get("topic")
+        entities = classification.get("entities") or {}
+        social_type = classification.get("social_type")
+
+        # ---------------------------------------------------------------
+        # Social
+        # ---------------------------------------------------------------
+
+        if social_type in SOCIAL_RESPONSES:
+            response = SOCIAL_RESPONSES[social_type]
+
+            self._update_context(
+                intent=intent,
+                topic=topic,
+            )
+
+            return response
+
+        # ---------------------------------------------------------------
+        # AI guardrail: out of scope
+        # ---------------------------------------------------------------
+
+        if intent == "out_of_scope":
+            self._update_context(
+                intent=intent,
+                topic=topic,
+            )
+
+            return OUT_OF_SCOPE_RESPONSE
+
+        # ---------------------------------------------------------------
+        # Live-data intents
+        # ---------------------------------------------------------------
+
+        if intent in LIVE_DATA_INTENTS:
+
+            # Node should have executed the required tool before
+            # generate_response() is called.
+
+            if tool_result is None:
+                logger.warning(
+                    "No tool result supplied for live-data intent: %s",
+                    intent,
+                )
+
+                # This prevents the LLM from inventing live data.
+                if intent == "product_search":
+                    return (
+                        "I couldn't retrieve the latest product information "
+                        "right now. Please try again in a moment."
+                    )
+
+                return (
+                    "I couldn't retrieve your order information right now. "
+                    "Please try again in a moment."
+                )
+
+            # -----------------------------------------------------------
+            # Order-specific guardrails
+            # -----------------------------------------------------------
+
+            if (
+                intent == "order_tracking"
+                and tool_result.get("error") == "Order number is required"
+            ):
+                self._update_context(
+                    intent="order_tracking",
+                    topic=topic,
+                    waiting_for="order_number",
+                )
+
+                return (
+                    "Sure, I can help you track your order. "
+                    "Please provide your PEAK order number, for example "
+                    "`PK-745B8012`."
+                )
+
+            if (
+                intent == "order_tracking"
+                and tool_result.get("error") == "Order not found"
+            ):
+                self._update_context(
+                    intent="order_tracking",
+                    topic=topic,
+                    waiting_for="order_number",
+                )
+
+                return (
+                    "I couldn't find that order. Please check the order "
+                    "number and make sure it belongs to your PEAK account."
+                )
+
+        # ---------------------------------------------------------------
+        # Static KB intents
+        # ---------------------------------------------------------------
+
+        kb_facts = {}
+
+        if intent in KB_INTENTS:
+            kb_facts = self.retrieve_kb_facts(
+                classification,
+                user_message,
+            )
+
+            # AI guardrail:
+            # Never allow the LLM to invent a PEAK policy when the KB
+            # contains no authoritative information for the request.
+            if not kb_facts:
+                self._update_context(
+                    intent=intent,
+                    topic=topic,
+                )
+
+                return UNKNOWN_POLICY_RESPONSE
+
+        # ---------------------------------------------------------------
+        # Prepare trusted information
+        # ---------------------------------------------------------------
+
+        retrieved_facts = {
+            "intent": intent,
+            "topic": topic,
+            "entities": entities,
+        }
+
+        if kb_facts:
+            retrieved_facts["knowledge_base"] = kb_facts
+
+        if tool_result:
+            retrieved_facts["tool_result"] = tool_result
+
+        # ---------------------------------------------------------------
+        # LLM CALL 2
+        # ---------------------------------------------------------------
+
         try:
-            sys.stdout.reconfigure(encoding="utf-8")
+            response = self.response_generator.generate(
+                user_query=user_message,
+                retrieved_facts=retrieved_facts,
+                context=self._get_context(),
+            )
+
         except Exception:
-            pass
+            logger.exception("Response generation failed.")
 
-    chatbot = Chatbot()
+            return (
+                "I'm sorry, I couldn't generate a response right now. "
+                "Please try again in a moment."
+            )
 
-    # Determine status dynamically from Ollama residency
-    if chatbot.is_ready():
-        status_text = "Status: Model ready"
-    else:
-        status_text = "Status: Loading Gemma 3 4B in background..."
-        chatbot.start_background_warmup()
+        # ---------------------------------------------------------------
+        # Conversation state
+        # ---------------------------------------------------------------
 
-    print("=" * 50)
-    print("PEAK AI Customer Support")
-    print("=" * 50)
-    print("Model: gemma3:4b")
-    print("Knowledge base: loaded")
-    print(status_text)
-    print("Type 'exit' or 'quit' to stop.\n")
+        waiting_for = None
+
+        if (
+            intent == "order_tracking"
+            and not entities.get("order_number")
+            and (
+                tool_result is None
+                or tool_result.get("error") == "Order number is required"
+            )
+        ):
+            waiting_for = "order_number"
+
+        self._update_context(
+            intent=intent,
+            topic=topic,
+            waiting_for=waiting_for,
+        )
+
+        return response
+
+    # -----------------------------------------------------------------------
+    # Legacy terminal interface
+    # -----------------------------------------------------------------------
+
+    def process(
+        self,
+        user_message: str,
+        user_id: Optional[str] = None,
+    ) -> str:
+        """
+        Local/terminal compatibility method.
+
+        Production API should use:
+            classify_message()
+            generate_response()
+
+        Live MongoDB data cannot be accessed through this method because
+        ProductTool and OrderTool belong to Node.js.
+        """
+
+        classification = self.classify_message(user_message)
+
+        intent = classification.get("intent")
+
+        if classification.get("social_type"):
+            return self.generate_response(
+                user_message,
+                classification,
+            )
+
+        if intent == "out_of_scope":
+            return self.generate_response(
+                user_message,
+                classification,
+            )
+
+        if intent == "product_search":
+            return (
+                "I can help you find products, but live product search "
+                "is available through the application."
+            )
+
+        if intent == "order_tracking":
+
+            entities = classification.get("entities") or {}
+
+            if not entities.get("order_number"):
+                self._update_context(
+                    intent="order_tracking",
+                    topic=classification.get("topic"),
+                    waiting_for="order_number",
+                )
+
+                return (
+                    "Sure, I can help you track your order. "
+                    "Please provide your PEAK order number, for example "
+                    "`PK-745B8012`."
+                )
+
+            return (
+                "I can help you track that order, but live order tracking "
+                "is available through the application."
+            )
+
+        return self.generate_response(
+            user_message,
+            classification,
+        )
+
+
+# ---------------------------------------------------------------------------
+# Terminal mode
+# ---------------------------------------------------------------------------
+
+if __name__ == "__main__":
+
+    logging.basicConfig(
+        level=logging.INFO,
+        format="%(asctime)s | %(levelname)s | %(message)s",
+    )
+
+    bot = Chatbot()
+
+    print("Warming up chatbot...")
+    bot.warm_up()
+
+    print("\nPEAK Chatbot")
+    print("Type 'exit' to quit.\n")
 
     while True:
         try:
             user_input = input("You: ").strip()
 
-            if user_input.lower() in ("exit", "quit"):
-                print("\nPEAK: Thank you for visiting PEAK. Have a great day!")
+            if user_input.lower() in {"exit", "quit"}:
+                print("Bot: Goodbye!")
                 break
 
             if not user_input:
                 continue
 
-            # Indicate status if first query is submitted during warm-up
-            if not chatbot.is_ready():
-                print("[Warming model in background, please wait...]")
+            response = bot.process(user_input)
 
-            response = chatbot.process(user_input)
-            print(f"\nPEAK: {response}\n")
+            print(f"Bot: {response}\n")
 
-        except (KeyboardInterrupt, EOFError):
-            print("\n\nPEAK: Goodbye!")
+        except KeyboardInterrupt:
+            print("\nBot: Goodbye!")
             break
-        except Exception as e:
-            logger.error(f"Unexpected error during processing: {e}", exc_info=True)
-            print("\nPEAK: Sorry, I'm temporarily unable to process that request. Please try again.\n")
 
+        except Exception:
+            logger.exception("Terminal chatbot error.")
 
-if __name__ == "__main__":
-    main()
-
+            print(
+                "Bot: Sorry, something went wrong. "
+                "Please try again.\n"
+            )

@@ -10,6 +10,7 @@ Strict grounding guardrails:
 - If Ollama is unavailable or an error occurs, falls back cleanly to the verified FAQ answer.
 """
 
+import time
 import json
 import logging
 from typing import Any, Dict, Optional
@@ -80,6 +81,7 @@ CUSTOMER QUESTION:
 PEAK CUSTOMER SUPPORT RESPONSE:"""
 
         try:
+            start_timer = time.perf_counter()
             response = self.client.chat(
                 model=self.model_name,
                 options={
@@ -90,6 +92,10 @@ PEAK CUSTOMER SUPPORT RESPONSE:"""
                 keep_alive=self.keep_alive,
                 messages=[{"role": "user", "content": prompt}],
             )
+
+            elapsed = time.perf_counter() - start_timer
+            print(f"LLM Call 2 completed in {elapsed:.2f} seconds", flush=True)
+            
             generated_text = response.get("message", {}).get("content", "").strip()
 
             if generated_text:
