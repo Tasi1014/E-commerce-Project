@@ -9,6 +9,7 @@ import LoginPromptModal from "../Components/UI/LoginPromptModal";
 import { useCart } from "../context/CartContext";  
 import { useWishlist } from "../context/WishlistContext";
 import { useEffect } from "react";
+import AIChatWidget from "../Components/Chat/AIChatWidget";
 
 export default function HomeLayout() {
   const location = useLocation();
@@ -35,7 +36,7 @@ export default function HomeLayout() {
       <ProfileDrawer />
 
       {/* Main Content Area – bottom padding on mobile for bottom nav bar clearance */}
-      <main className="flex-grow pb-[60px] md:pb-0">
+      <main className="grow pb-60px md:pb-0">
         <Outlet />
       </main>
 
@@ -49,6 +50,7 @@ export default function HomeLayout() {
       <LoginPromptModal isOpen={showLoginModal} onClose={closeLoginModal} />
       {/* Wishlist login modal */}
       <LoginPromptModal isOpen={showWishlistLoginModal} onClose={closeWishlistLoginModal} />
+      <AIChatWidget/>
     </div>
   );
 }
