@@ -74,6 +74,9 @@ class Chatbot:
         self._conversation_state = {
             "previous_intent": None,
             "previous_topic": None,
+            "previous_entities": {},
+            "last_user_message": None,
+            "last_bot_message": None,
             "waiting_for": None,
         }
 
@@ -109,6 +112,9 @@ class Chatbot:
         self._conversation_state = {
             "previous_intent": None,
             "previous_topic": None,
+            "previous_entities": {},
+            "last_user_message": None,
+            "last_bot_message": None,
             "waiting_for": None,
         }
 
@@ -141,6 +147,9 @@ class Chatbot:
         return {
             "previous_intent": self._conversation_state["previous_intent"],
             "previous_topic": self._conversation_state["previous_topic"],
+            "previous_entities": self._conversation_state["previous_entities"],
+            "last_user_message": self._conversation_state["last_user_message"],
+            "last_bot_message": self._conversation_state["last_bot_message"],
             "waiting_for": self._conversation_state["waiting_for"],
         }
 
@@ -148,10 +157,16 @@ class Chatbot:
         self,
         intent: Optional[str],
         topic: Optional[str],
+        entities: Optional[Dict[str, Any]] = None,
+        user_message: Optional[str] = None,
+        bot_message: Optional[str] = None,
         waiting_for: Optional[str] = None,
     ) -> None:
         self._conversation_state["previous_intent"] = intent
         self._conversation_state["previous_topic"] = topic
+        self._conversation_state["previous_entities"] = entities or {}
+        self._conversation_state["last_user_message"] = user_message
+        self._conversation_state["last_bot_message"] = bot_message
         self._conversation_state["waiting_for"] = waiting_for
 
     # -----------------------------------------------------------------------
@@ -211,11 +226,15 @@ class Chatbot:
         message: str,
     ) -> Optional[Dict[str, Any]]:
         """
-        Resolve short follow-up messages using the existing conversation state.
+        Resolve only clear contextual follow-ups.
+
+        Short messages are NOT automatically treated as follow-ups.
+        The current message must contain a clear contextual signal.
         """
 
         previous_intent = self._conversation_state["previous_intent"]
         previous_topic = self._conversation_state["previous_topic"]
+        previous_entities = self._conversation_state["previous_entities"]
         waiting_for = self._conversation_state["waiting_for"]
 
         if not previous_intent:
@@ -226,40 +245,97 @@ class Chatbot:
         if not message:
             return None
 
-        # Previous turn requested a missing entity.
-        if waiting_for:
-            entities = {}
+        normalized = message.lower()
 
-            if waiting_for == "order_number":
-                match = re.search(
-                    r"\bPK-[0-9A-Fa-f]{8}\b",
-                    message,
-                )
+        # ---------------------------------------------------------------
+        # Waiting for a missing order number
+        # ---------------------------------------------------------------
 
-                if match:
-                    entities["order_number"] = match.group(0).upper()
+        if waiting_for == "order_number":
+            match = re.search(
+                r"\bPK-[0-9A-Fa-f]{8}\b",
+                message,
+            )
 
-            return {
-                "intent": previous_intent,
-                "topic": previous_topic,
-                "entities": entities,
-                "social_type": None,
-                "is_prefiltered": False,
-                "is_followup": True,
-            }
+            if match:
+                return {
+                    "intent": "order_tracking",
+                    "topic": previous_topic,
+                    "entities": {
+                        "order_number": match.group(0).upper()
+                    },
+                    "social_type": None,
+                    "is_prefiltered": False,
+                    "is_followup": True,
+                }
 
-        # Short follow-up such as:
-        # "What about Kathmandu?"
-        # "What about COD?"
-        if len(message.split()) <= 4:
-            return {
-                "intent": previous_intent,
-                "topic": previous_topic,
-                "entities": {},
-                "social_type": None,
-                "is_prefiltered": False,
-                "is_followup": True,
-            }
+            # Do NOT automatically force unrelated messages
+            # into order tracking.
+            return None
+
+        # ---------------------------------------------------------------
+        # Clear order-tracking follow-ups
+        # ---------------------------------------------------------------
+
+        if previous_intent == "order_tracking":
+
+            order_number = previous_entities.get("order_number")
+
+            order_followup_patterns = [
+                r"\bthat order\b",
+                r"\bthis order\b",
+                r"\bthe order\b",
+                r"\bwhen will .* arrive\b",
+                r"\bwhen will .* be delivered\b",
+                r"\bwhen .* arrive\b",
+                r"\bwhen .* delivered\b",
+                r"\bwhat is the status\b",
+                r"\bwhat's the status\b",
+                r"\bstatus of (?:that|this|the) order\b",
+                r"\bwhere is (?:that|this|the) order\b",
+                r"\bhas .* been delivered\b",
+                r"\bhas .* shipped\b",
+                r"\bhas .* been shipped\b",
+            ]
+
+            is_order_followup = any(
+                re.search(pattern, normalized)
+                for pattern in order_followup_patterns
+            )
+
+            if is_order_followup and order_number:
+                return {
+                    "intent": "order_tracking",
+                    "topic": None,
+                    "entities": {
+                        "order_number": order_number
+                    },
+                    "social_type": None,
+                    "is_prefiltered": False,
+                    "is_followup": True,
+                }
+
+        # ---------------------------------------------------------------
+        # Payment follow-ups
+        # ---------------------------------------------------------------
+
+        if previous_intent == "payment_information":
+
+            payment_followup_patterns = [
+                r"^what about (?:cod|cash on delivery)$",
+                r"^what about (?:that|this) payment method$",
+                r"^and (?:cod|cash on delivery)$",
+                r"^how about (?:cod|cash on delivery)$",
+            ]
+
+            is_payment_followup = any(
+                re.search(pattern, normalized)
+                for pattern in payment_followup_patterns
+            )
+
+            if is_payment_followup:
+                # Let the LLM classify payment follow-ups.
+                return None
 
         return None
 
@@ -339,7 +415,7 @@ class Chatbot:
             }:
                 social_type = "farewell"
 
-            return {
+            classification = {
                 "intent": "general_faq",
                 "topic": None,
                 "entities": {},
@@ -347,6 +423,15 @@ class Chatbot:
                 "is_prefiltered": True,
                 "is_followup": False,
             }
+
+            self._update_context(
+                intent=classification["intent"],
+                topic=None,
+                entities={},
+                user_message=user_message,
+            )
+
+            return classification
 
         # ---------------------------------------------------------------
         # Contextual follow-up
@@ -359,6 +444,14 @@ class Chatbot:
                 "Contextual follow-up resolved: %s",
                 followup,
             )
+
+            self._update_context(
+                intent=followup["intent"],
+                topic=followup["topic"],
+                entities=followup["entities"],
+                user_message=user_message,
+            )
+
             return followup
 
         # ---------------------------------------------------------------
@@ -384,6 +477,13 @@ class Chatbot:
             classification["intent"],
             classification["topic"],
             classification["entities"],
+        )
+
+        self._update_context(
+            intent=classification["intent"],
+            topic=classification["topic"],
+            entities=classification["entities"],
+            user_message=user_message,
         )
 
         return classification
@@ -480,6 +580,9 @@ class Chatbot:
             self._update_context(
                 intent=intent,
                 topic=topic,
+                entities=entities,
+                user_message=user_message,
+                bot_message=response,
             )
 
             return response
@@ -489,12 +592,17 @@ class Chatbot:
         # ---------------------------------------------------------------
 
         if intent == "out_of_scope":
+            response = OUT_OF_SCOPE_RESPONSE
+
             self._update_context(
                 intent=intent,
                 topic=topic,
+                entities=entities,
+                user_message=user_message,
+                bot_message=response,
             )
 
-            return OUT_OF_SCOPE_RESPONSE
+            return response
 
         # ---------------------------------------------------------------
         # Live-data intents
@@ -511,17 +619,26 @@ class Chatbot:
                     intent,
                 )
 
-                # This prevents the LLM from inventing live data.
                 if intent == "product_search":
-                    return (
+                    response = (
                         "I couldn't retrieve the latest product information "
                         "right now. Please try again in a moment."
                     )
+                else:
+                    response = (
+                        "I couldn't retrieve your order information right now. "
+                        "Please try again in a moment."
+                    )
 
-                return (
-                    "I couldn't retrieve your order information right now. "
-                    "Please try again in a moment."
+                self._update_context(
+                    intent=intent,
+                    topic=topic,
+                    entities=entities,
+                    user_message=user_message,
+                    bot_message=response,
                 )
+
+                return response
 
             # -----------------------------------------------------------
             # Order-specific guardrails
@@ -531,32 +648,42 @@ class Chatbot:
                 intent == "order_tracking"
                 and tool_result.get("error") == "Order number is required"
             ):
-                self._update_context(
-                    intent="order_tracking",
-                    topic=topic,
-                    waiting_for="order_number",
-                )
-
-                return (
+                response = (
                     "Sure, I can help you track your order. "
                     "Please provide your PEAK order number, for example "
                     "`PK-745B8012`."
                 )
 
+                self._update_context(
+                    intent="order_tracking",
+                    topic=topic,
+                    entities=entities,
+                    user_message=user_message,
+                    bot_message=response,
+                    waiting_for="order_number",
+                )
+
+                return response
+
             if (
                 intent == "order_tracking"
                 and tool_result.get("error") == "Order not found"
             ):
-                self._update_context(
-                    intent="order_tracking",
-                    topic=topic,
-                    waiting_for="order_number",
-                )
-
-                return (
+                response = (
                     "I couldn't find that order. Please check the order "
                     "number and make sure it belongs to your PEAK account."
                 )
+
+                self._update_context(
+                    intent="order_tracking",
+                    topic=topic,
+                    entities=entities,
+                    user_message=user_message,
+                    bot_message=response,
+                    waiting_for="order_number",
+                )
+
+                return response
 
         # ---------------------------------------------------------------
         # Static KB intents
@@ -574,12 +701,17 @@ class Chatbot:
             # Never allow the LLM to invent a PEAK policy when the KB
             # contains no authoritative information for the request.
             if not kb_facts:
+                response = UNKNOWN_POLICY_RESPONSE
+
                 self._update_context(
                     intent=intent,
                     topic=topic,
+                    entities=entities,
+                    user_message=user_message,
+                    bot_message=response,
                 )
 
-                return UNKNOWN_POLICY_RESPONSE
+                return response
 
         # ---------------------------------------------------------------
         # Prepare trusted information
@@ -611,10 +743,20 @@ class Chatbot:
         except Exception:
             logger.exception("Response generation failed.")
 
-            return (
+            response = (
                 "I'm sorry, I couldn't generate a response right now. "
                 "Please try again in a moment."
             )
+
+            self._update_context(
+                intent=intent,
+                topic=topic,
+                entities=entities,
+                user_message=user_message,
+                bot_message=response,
+            )
+
+            return response
 
         # ---------------------------------------------------------------
         # Conversation state
@@ -635,6 +777,9 @@ class Chatbot:
         self._update_context(
             intent=intent,
             topic=topic,
+            entities=entities,
+            user_message=user_message,
+            bot_message=response,
             waiting_for=waiting_for,
         )
 
@@ -677,32 +822,57 @@ class Chatbot:
             )
 
         if intent == "product_search":
-            return (
+            response = (
                 "I can help you find products, but live product search "
                 "is available through the application."
             )
+
+            self._update_context(
+                intent=intent,
+                topic=classification.get("topic"),
+                entities=classification.get("entities") or {},
+                user_message=user_message,
+                bot_message=response,
+            )
+
+            return response
 
         if intent == "order_tracking":
 
             entities = classification.get("entities") or {}
 
             if not entities.get("order_number"):
-                self._update_context(
-                    intent="order_tracking",
-                    topic=classification.get("topic"),
-                    waiting_for="order_number",
-                )
-
-                return (
+                response = (
                     "Sure, I can help you track your order. "
                     "Please provide your PEAK order number, for example "
                     "`PK-745B8012`."
                 )
 
-            return (
+                self._update_context(
+                    intent="order_tracking",
+                    topic=classification.get("topic"),
+                    entities=entities,
+                    user_message=user_message,
+                    bot_message=response,
+                    waiting_for="order_number",
+                )
+
+                return response
+
+            response = (
                 "I can help you track that order, but live order tracking "
                 "is available through the application."
             )
+
+            self._update_context(
+                intent="order_tracking",
+                topic=classification.get("topic"),
+                entities=entities,
+                user_message=user_message,
+                bot_message=response,
+            )
+
+            return response
 
         return self.generate_response(
             user_message,
